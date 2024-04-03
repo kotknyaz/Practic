@@ -1,7 +1,7 @@
-#include "mylibrary.h"
+#include "ptdGame.h"
 #include <iostream>
 
-namespace mylibrary {
+namespace ptd {
     int func() {
         std::cout << "Hello world!" << std::endl;
 

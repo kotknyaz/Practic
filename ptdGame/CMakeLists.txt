@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.22)
 
-set(project "mylibrary")
+set(project "ptdGame")
 project(${project})
 
 set(CMAKE_CXX_STANDARD 17)
 
 set(${project}_SOURCES
-        mylibrary.cpp)
+        ptdGame.cpp)
 
 set(${project}_HEADERS
-        mylibrary.h)
+        ptdGame.h)
 
 set(${project}_SOURCE_LIST
         ${${project}_SOURCES}
