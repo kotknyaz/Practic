@@ -18,3 +18,6 @@ set(${project}_SOURCE_LIST
 add_library(${project}
         STATIC
         ${${project}_SOURCE_LIST})
+        
+
+include_directories(${CMAKE_SOURCE_DIR}/SFML/include)
