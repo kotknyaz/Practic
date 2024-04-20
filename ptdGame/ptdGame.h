@@ -26,7 +26,7 @@ namespace ptd {
 	};
 	struct UpdateInfo //передается от Interpreter к GameManager (действия игрока между кадрами)
 	{
-		double view; // temp напрвление центра взгляда
+		double viewChange; // temp напрвление центра взгляда
 	};
 	struct Wall // стена в 2D
 	{
@@ -34,6 +34,12 @@ namespace ptd {
 	public:
 		Wall(Coord, Coord);
 		Wall();
+	};
+	struct CrossingRayLineInfo 
+	{
+		bool isCrossing;
+		double angle;
+		double distance;
 	};
 	struct VisibleWall // класс для отрисовки стен  псевдо-3D; углы считаются слева (экрана), от 0 до FOV
 	{
@@ -72,12 +78,14 @@ namespace ptd {
 
 	class GameManager // 2D движок в котором выполняется игра (ходьба, стрельба, подгрузка комнат и т.п.)
 	{
+		sf::Clock* clock;
 
 		std::vector<Wall*> walls; // temp
 		Coord playerPos;
 		double view;
 
 		std::vector<VisibleWall> GetVisibleWalls();
+		CrossingRayLineInfo CrossingRayLine(const Wall&, double angle);
 
 	public:
 		GameManager(); // пока пусто

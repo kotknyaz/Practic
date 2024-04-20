@@ -3,12 +3,13 @@
 namespace ptd {
     const double FOV = (M_PI / 3);
     const double FOV_DIVIDE_BY2 = FOV / 2;
-
+    const double CAMERA_ROTATING_KOEF = 1.f / 150.f;
 
 
     MainMenu::MainMenu()
     {
         window = new sf::RenderWindow(sf::VideoMode(800, 600), "My window");
+        window->setFramerateLimit(60);
 
         Menu();
     }
@@ -51,14 +52,24 @@ namespace ptd {
             view - центр взгляда игрока (в радианах; ноль это вправо, 90 градусов - вверх) (чтобы узнать край вида игрока есть константа FOV_DIVIDE_BY2)
         на выход:
             массив стен аналогичный с walls (начало первой; конец первой; начало второй; конец второй; начало третьей ...)
-                (для этого я думал использовать пока нереализованную функцию о которой мы говорили - GetCrossingDot (или что то такое))
+                (для этого я думал использовать пока нереализованную функцию о которой мы говорили - CrossingRayLine (или что то такое))
         */
         std::vector<VisibleWall> t;
         return t;
     }
 
+    CrossingRayLineInfo CrossingRayLine(const Wall& wall, double angle)
+    {
+        CrossingRayLineInfo a;
+        return a;
+    }
+
+
+
     GameManager::GameManager()
     {
+        clock = new sf::Clock();
+
         walls.push_back(new Wall(Coord(-2, 4), Coord(3, 4)));
         walls.push_back(new Wall(Coord(3, 4), Coord(3, -4)));
         walls.push_back(new Wall(Coord(3, -4), Coord(-2, -4)));
@@ -68,6 +79,10 @@ namespace ptd {
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
     {
         PrintInfo2D printInfo;
+
+        view += updateInfo.viewChange * clock->getElapsedTime().asMilliseconds() * CAMERA_ROTATING_KOEF;
+        std::cout << std::endl << 1.f / clock->getElapsedTime().asSeconds() << std::endl;
+        clock->restart();
 
         // temp
         printInfo.walls = walls;
@@ -92,6 +107,8 @@ namespace ptd {
         while (window->isOpen())
         {
             sf::Event event;
+
+            UpdateInfo toSent;
             while (window->pollEvent(event))
             {
                 switch (event.type)
@@ -101,10 +118,35 @@ namespace ptd {
                     window->close();
                     break;
                 }
+                /*
+                case sf::Event::KeyPressed:         //закрытие окна
+                {
+                    if (event.key.code == sf::Keyboard::A)
+                    {
+                        toSent.viewChange += 1;
+                    }
+                    if (event.key.code == sf::Keyboard::D)
+                    {
+                        toSent.viewChange -= 1;
+                    }
+                    break;
+                }
+                */
                 }
             }
-            UpdateInfo toSent;
-            toSent.view = 0;
+
+            // поворот камеры
+            toSent.viewChange = 0;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+            {
+                toSent.viewChange += 1;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+            {
+                toSent.viewChange -= 1;
+            }
+
+
             Print2D( gm->Update2D(toSent) );
         }
     }
@@ -122,9 +164,9 @@ namespace ptd {
 
         for (int i = 0; i < info.walls.size(); ++i)
         {
-            std::cout << i << "\n";
-            std::cout << info.walls[i]->coord[0].x << " " << info.walls[i]->coord[0].y << std::endl;
-            std::cout << info.walls[i]->coord[1].x << " " << info.walls[i]->coord[1].y << std::endl;
+            //std::cout << i << "\n";
+            //std::cout << info.walls[i]->coord[0].x << " " << info.walls[i]->coord[0].y << std::endl;
+            //std::cout << info.walls[i]->coord[1].x << " " << info.walls[i]->coord[1].y << std::endl;
             vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.walls[i]->coord[0].x + info.playerPos.x) * koef,
                 halfScreenY - (info.walls[i]->coord[0].y - info.playerPos.y) * koef), sf::Color::Blue));
             vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.walls[i]->coord[1].x + info.playerPos.x) * koef,
