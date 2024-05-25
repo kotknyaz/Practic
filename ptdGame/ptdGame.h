@@ -27,6 +27,7 @@ namespace ptd {
 	struct UpdateInfo //передается от Interpreter к GameManager (действия игрока между кадрами)
 	{
 		double viewChange; // temp напрвление центра взгляда
+		double playerPosChange; // temp координаты игрока
 	};
 	struct Wall // стена в 2D
 	{

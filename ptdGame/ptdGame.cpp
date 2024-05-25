@@ -54,12 +54,16 @@ namespace ptd {
             массив стен аналогичный с walls (начало первой; конец первой; начало второй; конец второй; начало третьей ...)
                 (для этого я думал использовать пока нереализованную функцию о которой мы говорили - CrossingRayLine (или что то такое))
         */
+
+
         std::vector<VisibleWall> t;
         return t;
     }
 
     CrossingRayLineInfo CrossingRayLine(const Wall& wall, double angle)
     {
+        
+
         CrossingRayLineInfo a;
         return a;
     }
@@ -79,15 +83,22 @@ namespace ptd {
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
     {
         PrintInfo2D printInfo;
-
         view += updateInfo.viewChange * clock->getElapsedTime().asMilliseconds() * CAMERA_ROTATING_KOEF;
-        std::cout << std::endl << 1.f / clock->getElapsedTime().asSeconds() << std::endl;
+        //std::cout << std::endl << 1.f / clock->getElapsedTime().asSeconds() << std::endl;
         clock->restart();
+        
+        //----------------------------------------- Изменение положения игрока относительно направления взгляда - начало -  -----------------------------------------
+        playerPos.x += updateInfo.playerPosChange * cos(view);
+        playerPos.y += updateInfo.playerPosChange * sin(view);
+        std::cout << view << std::endl;
+
+        //----------------------------------------- Изменение положения игрока относительно направления взгляда - конец -  -----------------------------------------
 
         // temp
         printInfo.walls = walls;
-        printInfo.playerPos.x = playerPos.x;
-        printInfo.playerPos.y = playerPos.y;
+        printInfo.playerPos.x += playerPos.x;
+        printInfo.playerPos.y += playerPos.y;
+        //std::cout << printInfo.playerPos.x << " _ " << printInfo.playerPos.y << std::endl;
         printInfo.viewLeft = view + FOV_DIVIDE_BY2;
         printInfo.viewRight = view - FOV_DIVIDE_BY2;
 
@@ -137,15 +148,25 @@ namespace ptd {
 
             // поворот камеры
             toSent.viewChange = 0;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)))
             {
                 toSent.viewChange += 1;
             }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)))
             {
                 toSent.viewChange -= 1;
             }
-
+            
+            // движение вперёд-назад (возможно временно)
+            toSent.playerPosChange = 0;
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)))
+            {
+                toSent.playerPosChange += 0.05;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)))
+            {
+                toSent.playerPosChange -= 0.05;
+            }
 
             Print2D( gm->Update2D(toSent) );
         }
@@ -156,7 +177,7 @@ namespace ptd {
         window->clear(sf::Color::Black);
         //вид сверху; центр - игрок; все стены х koef; y - вверх, х - вправо
         // стены - синий; взгляд - зеленый; видимые стены - красный; игрок - белый
-        double koef = 40;
+        double koef = 45;
         double rayLenth = 500;
         sf::VertexArray vertexWalls(sf::PrimitiveType::Lines, 0);
         double halfScreenX = window->getSize().x / 2;
@@ -217,6 +238,7 @@ namespace ptd {
         playerPos = Coord(0.f, 0.f);
         //walls = std::vector<Wall*>();
     }
+
 
     Wall::Wall() {}
 
