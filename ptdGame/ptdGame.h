@@ -36,13 +36,28 @@ namespace ptd {
 		Wall(Coord, Coord);
 		Wall();
 	};
+	struct RayLine // луч
+	{
+		Coord coord[2];
+		double length;
+	public:
+		RayLine(Coord, Coord);
+		RayLine();
+	};
 	struct CrossingRayLineInfo 
 	{
 		bool isCrossing;
 		double angle;
 		double distance;
 	};
-	struct VisibleWall // класс для отрисовки стен  псевдо-3D; углы считаются слева (экрана), от 0 до FOV
+	struct VisibleWall
+	{
+		Coord coord[2];
+	public:
+		VisibleWall(Coord, Coord);
+		VisibleWall();
+	};
+	/*struct VisibleWall // класс для отрисовки стен  псевдо-3D; углы считаются слева (экрана), от 0 до FOV
 	{
 		double leftBound_angle;
 		double leftBound_distance;
@@ -51,12 +66,13 @@ namespace ptd {
 		Wall* wall;
 	public:
 		VisibleWall();
-	};
+	};*/
 	struct PrintInfo2D // передается от GameManager к Interpreter (что теперь нужно рисовать; в ответ на UpdateInfo)
 	{
 		//temp
 		Coord playerPos;
 		std::vector<Wall*> walls;
+		std::vector<RayLine> VRL;
 		std::vector<VisibleWall> visibleWalls;
 		double viewLeft;
 		double viewRight;
@@ -86,6 +102,7 @@ namespace ptd {
 		double view;
 
 		std::vector<VisibleWall> GetVisibleWalls();
+		std::vector<RayLine> GetCrossingRayLines(); // определяет длину каждого луча в зависимости от расстояния до стены
 		CrossingRayLineInfo CrossingRayLine(const Wall&, double angle);
 
 	public:
