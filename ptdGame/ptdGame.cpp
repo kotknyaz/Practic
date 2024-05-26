@@ -44,89 +44,20 @@ namespace ptd {
 
     std::vector<VisibleWall> GameManager::GetVisibleWalls()
     {
-        /*
-        на вход: 
-            у класса GameManager есть поля: 
-            PlayerPos - координата игрока
-            walls - vector со стенами (нулевой елем. - начало первой стены; первый элем. - конец первой стены; второй элем. - начало второй стены и т.д.)
-            view - центр взгляда игрока (в радианах; ноль это вправо, 90 градусов - вверх) (чтобы узнать край вида игрока есть константа FOV_DIVIDE_BY2)
-        на выход:
-            массив стен аналогичный с walls (начало первой; конец первой; начало второй; конец второй; начало третьей ...)
-                (для этого я думал использовать пока нереализованную функцию о которой мы говорили - CrossingRayLine (или что то такое))
-        */
         std::vector<RayLine> VRL = GameManager::GetCrossingRayLines();
         std::vector<VisibleWall> t;
         VisibleWall VW;
 
-        bool isleft = true;
+        bool isbeginwall = true;
         bool isotherwall = false;
         bool isin = false;
-        /*for (int i = 0; i < walls.size(); i++) {
-            for (int j = 0; j < VRL.size(); j++) {
-                if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x))) {
-                    if ((VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
-                        isin = true;
-                        if (isleft && isotherwall && i != 0) {
-                            VW.coord[0].x = walls[i - 1]->coord[1].x;
-                            VW.coord[0].y = walls[i - 1]->coord[1].y;
-                            isleft = false;
-                            
-                        }
-                        else if (isleft) {
-                            VW.coord[0].x = VRL[j].coord[1].x;
-                            VW.coord[0].y = VRL[j].coord[1].y;
-                            isleft = false;
-                        }
-                        else {
-                            if (isotherwall && i != 0) {
-                                VW.coord[1].x = walls[i - 1]->coord[1].x;
-                                VW.coord[1].y = walls[i - 1]->coord[1].y;
-                                isotherwall = false;
-                            }
-                            else {
-                                VW.coord[1].x = VRL[j].coord[1].x;
-                                VW.coord[1].y = VRL[j].coord[1].y;
-                            }
-                        }
-                    }
-                }
-                /*if ((VRL[j].coord[1].x != VRL[0].coord[1].x) && (VRL[j].coord[1].y != VRL[0].coord[1].y) && ((VRL[0].coord[1].x <= walls[i]->coord[0].x) || (VRL[0].coord[1].y <= walls[i]->coord[0].y))) {
-                    VW.coord[0].x = walls[i]->coord[0].x;
-                    VW.coord[0].y = walls[i]->coord[0].y;
-                }
-                if ((VRL[j].coord[1].x != VRL[VRL.size() - 1].coord[1].x) && (VRL[j].coord[1].y != VRL[VRL.size() - 1].coord[1].y) && ((VRL[VRL.size() - 1].coord[1].x >= walls[i]->coord[0].x) || (VRL[VRL.size() - 1].coord[1].y >= walls[i]->coord[0].y))) {
-                    VW.coord[1].x = walls[i]->coord[1].x;
-                    VW.coord[1].y = walls[i]->coord[1].y;
-                }
-            }
-            t.push_back(VW);
-            isleft = true;
-            isotherwall = true;
-        }*/
-
         for (int i = 0; i < walls.size(); i++) {
             for (int j = 0; j < VRL.size(); j++) {
                 if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
-                    isin = true;
-                    if (isleft && isotherwall) {
-                        if (j == VRL.size() - 1) {
-                            VW.coord[0].x = walls[i]->coord[1].x;
-                            VW.coord[0].y = walls[i]->coord[1].y;
-                            VW.coord[1].x = VRL[j].coord[1].x;
-                            VW.coord[1].y = VRL[j].coord[1].y;
-                           // std::cout << "YEEEES" << std::endl;
-                        }
-                        else {
-                            VW.coord[0].x = walls[i]->coord[0].x;
-                            VW.coord[0].y = walls[i]->coord[0].y;
-                            isotherwall = false;
-                            isleft = false;
-                        }
-                    }
-                    else if (isleft) {
+                    if (isbeginwall) {
                         VW.coord[0].x = VRL[j].coord[1].x;
                         VW.coord[0].y = VRL[j].coord[1].y;
-                        isleft = false;
+                        isbeginwall = false;
                     }
                     else {
                         VW.coord[1].x = VRL[j].coord[1].x;
@@ -134,23 +65,13 @@ namespace ptd {
                     }
                 }
                 else {
-                    if (isin) {
-                        VW.coord[1].x = walls[i]->coord[1].x;
-                        VW.coord[1].y = walls[i]->coord[1].y;
-                        
-                        isotherwall = true;
-                        break;
-                    }
+                    t.push_back(VW);
+                    isbeginwall = true;
                 }
-                
             }
-            if (isin) {
-                t.push_back(VW);
-                isin = false;
-            }
-            isleft = true;
+            t.push_back(VW);
+            isbeginwall = true;
         }
-
         return t;
     }
 
@@ -164,7 +85,6 @@ namespace ptd {
         while (currentview >= rightview) {
             RL.coord[0].x = playerPos.x;
             RL.coord[0].y = playerPos.y;
-            //std::cout << playerPos.x << " --- " << playerPos.y << std::endl;
             RL.coord[1].x = cos(currentview) + playerPos.x;
             RL.coord[1].y = sin(currentview) + playerPos.y;
             VRL.push_back(RL);
@@ -286,7 +206,94 @@ namespace ptd {
         return a;
     }
 
+    /*RayLine GameManager::GetCollisionRayLines() {
+        std::vector<RayLine> VRL;
+        RayLine RL;
+        double delta = 0.1;
+        double interval = 0.1;
+        double currentview = 0;;
+        double c, s;
+        while (currentview <= 2 * M_PI) {
+            RL.coord[0].x = cos(currentview);
+            RL.coord[0].y = sin(currentview);
+            RL.coord[1].x = cos(currentview) + playerPos.x;
+            RL.coord[1].y = sin(currentview) + playerPos.y;
+            VRL.push_back(RL);
+            currentview += interval;
+        }
 
+        double k1, k2, b1, b2, xp, yp, minlength = DBL_MAX, xm = 999, ym = 999;
+        for (int i = 0; i < VRL.size(); i++) {
+            if (playerPos.x == VRL[i].coord[1].x) {
+                k1 = DBL_MAX;
+                b1 = 0;
+            }
+            else {
+                k1 = (playerPos.y - VRL[i].coord[1].y) / (playerPos.x - VRL[i].coord[1].x);
+                b1 = playerPos.y - (k1 * playerPos.x);
+            }
+            for (int j = 0; j < walls.size(); j++) {
+
+                if (walls[j]->coord[0].x == walls[j]->coord[1].x) {
+                    xp = walls[j]->coord[0].x;
+                    yp = (k1 * xp) + b1;
+                    if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
+                    if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
+                    if ((playerPos.x < VRL[i].coord[1].x) && (xp < playerPos.x)) { continue; }
+                    if ((playerPos.x > VRL[i].coord[1].x) && (xp > playerPos.x)) { continue; }
+                    VRL[i].length = sqrt(((xp - playerPos.x) * (xp - playerPos.x)) + ((yp - playerPos.y) * (yp - playerPos.y)));
+                    if (VRL[i].length > minlength) {
+                        VRL[i].length = minlength;
+                        VRL[i].coord[1].x = xm;
+                        VRL[i].coord[1].y = ym;
+                    }
+                    else {
+                        minlength = VRL[i].length;
+                        xm = xp;
+                        ym = yp;
+                    }
+                }
+                else {
+                    k2 = (walls[j]->coord[0].y - walls[j]->coord[1].y) / (walls[j]->coord[0].x - walls[j]->coord[1].x);
+                    b2 = walls[j]->coord[0].y - (k2 * walls[j]->coord[0].x);
+
+                    if (k1 == k2) { continue; }
+                    xp = (b2 - b1) / (k1 - k2);
+                    yp = (k2 * xp) + b2;
+                    if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
+                    if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
+                    if ((playerPos.x < VRL[i].coord[1].x) && (xp < playerPos.x)) { continue; }
+                    if ((playerPos.x > VRL[i].coord[1].x) && (xp > playerPos.x)) { continue; }
+
+
+                    VRL[i].length = sqrt(((xp - playerPos.x) * (xp - playerPos.x)) + ((yp - playerPos.y) * (yp - playerPos.y)));
+
+                    if (VRL[i].length > minlength) {
+                        VRL[i].length = minlength;
+                        VRL[i].coord[1].x = xm;
+                        VRL[i].coord[1].y = ym;
+                    }
+                    else {
+                        minlength = VRL[i].length;
+                        xm = xp;
+                        ym = yp;
+                    }
+                }
+                if (VRL[i].length <= delta) {
+                    RL.coord[1].x = VRL[i].coord[0].x;
+                    RL.coord[1].y = VRL[i].coord[0].y;
+                    RL.length = VRL[i].length;
+                    return RL;
+                }
+            }
+            minlength = DBL_MAX;
+            xm = 999;
+            ym = 999;
+        }
+
+        return RL;
+
+    }*/
 
     GameManager::GameManager()
     {
@@ -305,14 +312,12 @@ namespace ptd {
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
     {
         PrintInfo2D printInfo;
+        RayLine RL;
         view += updateInfo.viewChange * clock->getElapsedTime().asMilliseconds() * CAMERA_ROTATING_KOEF;
         //std::cout << std::endl << 1.f / clock->getElapsedTime().asSeconds() << std::endl;
         clock->restart();
         
-        //----------------------------------------- Изменение положения игрока относительно направления взгляда -----------------------------------------
-        playerPos.x += updateInfo.playerPosChange * cos(view);
-        playerPos.y += updateInfo.playerPosChange * sin(view);
-        //---------------------------------------------------------
+
 
         printInfo.VRL = GetCrossingRayLines(); // получаем вектор лучей: VRL[0].coord[0].x - точка начала по иксу (т.е. координата положения игрока по иксу), и тоже самое с y, 
                                                // VRL[0].coord[1].x - точка конца по иксу (т.е. координата точки пересечения со стеной по иксу), и тоже самое с y,
@@ -322,7 +327,12 @@ namespace ptd {
         printInfo.visibleWalls = GetVisibleWalls(); // получаем вектор видимых стен: visibleWalls[0].coord[0].x - точка начала по иксу, и тоже самое с y,
                                                     // visibleWalls[0].coord[1].x - точка конца по иксу, и тоже самое по y
                                                     // и т.д. (visibleWalls[1]..., visibleWalls[2]...)
+        //RL = GetCollisionRayLines();
  
+        //----------------------------------------- Изменение положения игрока относительно направления взгляда -----------------------------------------
+        playerPos.x += updateInfo.playerPosChange * cos(view);
+        playerPos.y += updateInfo.playerPosChange * sin(view);
+        //---------------------------------------------------------
         // temp
         printInfo.walls = walls;
         printInfo.playerPos.x += playerPos.x;
@@ -379,11 +389,11 @@ namespace ptd {
             toSent.viewChange = 0;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)))
             {
-                toSent.viewChange += 1;
+                toSent.viewChange += 0.5;
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)))
             {
-                toSent.viewChange -= 1;
+                toSent.viewChange -= 0.5;
             }
             
             // движение вперёд-назад (возможно временно)
@@ -418,22 +428,17 @@ namespace ptd {
             //std::cout << i << "\n";
             //std::cout << info.walls[i]->coord[0].x << " " << info.walls[i]->coord[0].y << std::endl;
             //std::cout << info.walls[i]->coord[1].x << " " << info.walls[i]->coord[1].y << std::endl;
-            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.walls[i]->coord[0].x + info.playerPos.x) * koef,
+            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (-info.walls[i]->coord[0].x + info.playerPos.x) * koef,
                 halfScreenY - (info.walls[i]->coord[0].y - info.playerPos.y) * koef), sf::Color::Blue));
-            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.walls[i]->coord[1].x + info.playerPos.x) * koef,
+            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (-info.walls[i]->coord[1].x + info.playerPos.x) * koef,
                 halfScreenY - (info.walls[i]->coord[1].y - info.playerPos.y) * koef), sf::Color::Blue));
         }
         for (int i = 0; i < info.visibleWalls.size(); ++i)
         {
-            //std::cout << i << "\n";
-            //std::cout << info.walls[i]->coord[0].x << " " << info.walls[i]->coord[0].y << std::endl;
-            //std::cout << info.walls[i]->coord[1].x << " " << info.walls[i]->coord[1].y << std::endl;
-            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.visibleWalls[i].coord[0].x + info.playerPos.x) * koef,
+            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (-info.visibleWalls[i].coord[0].x + info.playerPos.x) * koef,
                 halfScreenY - (info.visibleWalls[i].coord[0].y - info.playerPos.y) * koef), sf::Color::Red));
-            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.visibleWalls[i].coord[1].x + info.playerPos.x) * koef,
+            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (-info.visibleWalls[i].coord[1].x + info.playerPos.x) * koef,
                 halfScreenY - (info.visibleWalls[i].coord[1].y - info.playerPos.y) * koef), sf::Color::Red));
-            //std::cout << info.visibleWalls.size() << std::endl;
-            //std::cout << info.visibleWalls[i].coord[0].x << " --- " << info.visibleWalls[i].coord[0].y << " --- " << info.visibleWalls[i].coord[1].x << " --- " << info.visibleWalls[i].coord[1].y << std::endl;
         }
         
         sf::VertexArray vertexPlayer(sf::PrimitiveType::Lines);
@@ -448,15 +453,7 @@ namespace ptd {
             vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX + cos(ray) * info.VRL[i].length * koef,
                 halfScreenY - sin(ray) * info.VRL[i].length * koef), sf::Color::Green));
             ray -= interval;
-            //std::cout << info.playerPos.x << " --- " << info.playerPos.y << std::endl;
         }
-        /*vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX, halfScreenY), sf::Color::Green));
-        vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX + cos(info.viewLeft) * rayLenth,
-            halfScreenY - sin(info.viewLeft) * rayLenth), sf::Color::Green));
-        vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX, halfScreenY), sf::Color::Green));
-        vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX + cos(info.viewRight) * rayLenth,
-            halfScreenY - sin(info.viewRight) * rayLenth), sf::Color::Green));*/
-
         /*
         sf::VertexArray vertexVisibleWalls(sf::PrimitiveType::Lines, 0);
         for (int i = 0; i < info.visibleWalls.size(); ++i)
