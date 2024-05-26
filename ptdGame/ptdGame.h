@@ -104,6 +104,7 @@ namespace ptd {
 
 		std::vector<VisibleWall> GetVisibleWalls();
 		std::vector<RayLine> GetCrossingRayLines(); // определяет длину каждого луча в зависимости от расстояния до стены
+		RayLine GetCollisionRayLines();
 		CrossingRayLineInfo CrossingRayLine(const Wall&);
 
 	public:
