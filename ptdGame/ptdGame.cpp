@@ -59,7 +59,7 @@ namespace ptd {
         VisibleWall VW;
 
         bool isleft = true;
-        bool isotherwall = true;
+        bool isotherwall = false;
         bool isin = false;
         /*for (int i = 0; i < walls.size(); i++) {
             for (int j = 0; j < VRL.size(); j++) {
@@ -106,32 +106,49 @@ namespace ptd {
 
         for (int i = 0; i < walls.size(); i++) {
             for (int j = 0; j < VRL.size(); j++) {
-                if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x))) {
-                    if ((VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
-                        isin = true;
-                        if (isleft) {
-                            VW.coord[0].x = VRL[j].coord[1].x;
-                            VW.coord[0].y = VRL[j].coord[1].y;
-                            isleft = false;
-                        }
-                        else {
+                if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
+                    isin = true;
+                    if (isleft && isotherwall) {
+                        if (j == VRL.size() - 1) {
+                            VW.coord[0].x = walls[i]->coord[1].x;
+                            VW.coord[0].y = walls[i]->coord[1].y;
                             VW.coord[1].x = VRL[j].coord[1].x;
                             VW.coord[1].y = VRL[j].coord[1].y;
+                           // std::cout << "YEEEES" << std::endl;
+                        }
+                        else {
+                            VW.coord[0].x = walls[i]->coord[0].x;
+                            VW.coord[0].y = walls[i]->coord[0].y;
+                            isotherwall = false;
+                            isleft = false;
                         }
                     }
+                    else if (isleft) {
+                        VW.coord[0].x = VRL[j].coord[1].x;
+                        VW.coord[0].y = VRL[j].coord[1].y;
+                        isleft = false;
+                    }
+                    else {
+                        VW.coord[1].x = VRL[j].coord[1].x;
+                        VW.coord[1].y = VRL[j].coord[1].y;
+                    }
                 }
-                /*if ((VRL[j].coord[1].x != VRL[0].coord[1].x) && (VRL[j].coord[1].y != VRL[0].coord[1].y) && ((VRL[0].coord[1].x <= walls[i]->coord[0].x) || (VRL[0].coord[1].y <= walls[i]->coord[0].y))) {
-                    VW.coord[0].x = walls[i]->coord[0].x;
-                    VW.coord[0].y = walls[i]->coord[0].y;
+                else {
+                    if (isin) {
+                        VW.coord[1].x = walls[i]->coord[1].x;
+                        VW.coord[1].y = walls[i]->coord[1].y;
+                        
+                        isotherwall = true;
+                        break;
+                    }
                 }
-                if ((VRL[j].coord[1].x != VRL[VRL.size() - 1].coord[1].x) && (VRL[j].coord[1].y != VRL[VRL.size() - 1].coord[1].y) && ((VRL[VRL.size() - 1].coord[1].x >= walls[i]->coord[0].x) || (VRL[VRL.size() - 1].coord[1].y >= walls[i]->coord[0].y))) {
-                    VW.coord[1].x = walls[i]->coord[1].x;
-                    VW.coord[1].y = walls[i]->coord[1].y;
-                }*/
+                
             }
-            t.push_back(VW);
+            if (isin) {
+                t.push_back(VW);
+                isin = false;
+            }
             isleft = true;
-            isotherwall = true;
         }
 
         return t;
@@ -224,10 +241,48 @@ namespace ptd {
         return VRL;
     }
 
-    CrossingRayLineInfo CrossingRayLine(const Wall& wall, double angle)
+    CrossingRayLineInfo GameManager::CrossingRayLine(const Wall& wall)
     {
-        
         CrossingRayLineInfo a;
+        RayLine RL;
+        RL.coord[0].x = playerPos.x;
+        RL.coord[0].y = playerPos.y;
+        RL.coord[1].x = cos(view) + playerPos.x;
+        RL.coord[1].y = sin(view) + playerPos.y;
+
+        double k1, k2, b1, b2, xp, yp;
+        if (RL.coord[0].x == RL.coord[1].x) {
+            k1 = DBL_MAX;
+            b1 = 0;
+        }
+        else {
+            k1 = (RL.coord[0].y - RL.coord[1].y) / (RL.coord[0].x - RL.coord[1].x);
+            b1 = RL.coord[0].y - (k1 * RL.coord[0].x);
+        }
+        if (wall.coord[0].x == wall.coord[1].x) {
+            xp = wall.coord[0].x;
+            yp = (k1 * xp) + b1;
+            if ((xp > std::max(wall.coord[0].x, wall.coord[1].x)) || (xp < std::min(wall.coord[0].x, wall.coord[1].x))) {return a;}
+            if ((yp > std::max(wall.coord[0].y, wall.coord[1].y)) || (yp < std::min(wall.coord[0].y, wall.coord[1].y))) {return a;}
+            if ((RL.coord[0].x < RL.coord[1].x) && (xp < RL.coord[0].x)) {return a;}
+            if ((RL.coord[0].x > RL.coord[1].x) && (xp > RL.coord[0].x)) {return a;}
+            a.distance = sqrt(((xp - RL.coord[0].x) * (xp - RL.coord[0].x)) + ((yp - RL.coord[0].y) * (yp - RL.coord[0].y)));
+            a.isCrossing = true;
+        }
+        else {
+            k2 = (wall.coord[0].y - wall.coord[1].y) / (wall.coord[0].x - wall.coord[1].x);
+            b2 = wall.coord[0].y - (k2 * wall.coord[0].x);
+            if (k1 == k2) {return a;}
+            xp = (b2 - b1) / (k1 - k2);
+            yp = (k2 * xp) + b2;
+            if ((xp > std::max(wall.coord[0].x, wall.coord[1].x)) || (xp < std::min(wall.coord[0].x, wall.coord[1].x))) {return a;}
+            if ((yp > std::max(wall.coord[0].y, wall.coord[1].y)) || (yp < std::min(wall.coord[0].y, wall.coord[1].y))) { return a; }
+            if ((RL.coord[0].x < RL.coord[1].x) && (xp < RL.coord[0].x)) { return a; }
+            if ((RL.coord[0].x > RL.coord[1].x) && (xp > RL.coord[0].x)) { return a; }
+
+            a.distance = sqrt(((xp - RL.coord[0].x) * (xp - RL.coord[0].x)) + ((yp - RL.coord[0].y) * (yp - RL.coord[0].y)));
+            a.isCrossing = true;
+        }
         return a;
     }
 
@@ -377,6 +432,7 @@ namespace ptd {
                 halfScreenY - (info.visibleWalls[i].coord[0].y - info.playerPos.y) * koef), sf::Color::Red));
             vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.visibleWalls[i].coord[1].x + info.playerPos.x) * koef,
                 halfScreenY - (info.visibleWalls[i].coord[1].y - info.playerPos.y) * koef), sf::Color::Red));
+            //std::cout << info.visibleWalls.size() << std::endl;
             //std::cout << info.visibleWalls[i].coord[0].x << " --- " << info.visibleWalls[i].coord[0].y << " --- " << info.visibleWalls[i].coord[1].x << " --- " << info.visibleWalls[i].coord[1].y << std::endl;
         }
         
@@ -392,7 +448,7 @@ namespace ptd {
             vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX + cos(ray) * info.VRL[i].length * koef,
                 halfScreenY - sin(ray) * info.VRL[i].length * koef), sf::Color::Green));
             ray -= interval;
-            std::cout << info.playerPos.x << " --- " << info.playerPos.y << std::endl;
+            //std::cout << info.playerPos.x << " --- " << info.playerPos.y << std::endl;
         }
         /*vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX, halfScreenY), sf::Color::Green));
         vertexRays.append(sf::Vertex(sf::Vector2f(halfScreenX + cos(info.viewLeft) * rayLenth,
@@ -461,4 +517,10 @@ namespace ptd {
     }
 
     VisibleWall::VisibleWall() {}
+
+    CrossingRayLineInfo::CrossingRayLineInfo() {
+        this->distance = 0;
+        this->isCrossing = false;
+    }
 }
+

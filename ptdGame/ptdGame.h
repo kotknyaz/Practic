@@ -47,8 +47,9 @@ namespace ptd {
 	struct CrossingRayLineInfo 
 	{
 		bool isCrossing;
-		double angle;
 		double distance;
+	public:
+		CrossingRayLineInfo();
 	};
 	struct VisibleWall
 	{
@@ -85,7 +86,7 @@ namespace ptd {
 	class MainMenu // при начале игры создает GameManager (давая ему данные об уровне и т.п.) и 
 		//передает управление над окном к Interpreter`у (вместе с ссылкой на GameManager)
 	{
-		sf::RenderWindow *window;
+		sf::RenderWindow* window;
 
 	public:
 		MainMenu();
@@ -103,7 +104,7 @@ namespace ptd {
 
 		std::vector<VisibleWall> GetVisibleWalls();
 		std::vector<RayLine> GetCrossingRayLines(); // определяет длину каждого луча в зависимости от расстояния до стены
-		CrossingRayLineInfo CrossingRayLine(const Wall&, double angle);
+		CrossingRayLineInfo CrossingRayLine(const Wall&);
 
 	public:
 		GameManager(); // пока пусто
