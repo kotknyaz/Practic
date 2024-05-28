@@ -54,9 +54,54 @@ namespace ptd {
         for (int i = 0; i < walls.size(); i++) {
             for (int j = 0; j < VRL.size(); j++) {
                 if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
+                    isin = true;
                     if (isbeginwall) {
-                        VW.coord[0].x = VRL[j].coord[1].x;
-                        VW.coord[0].y = VRL[j].coord[1].y;
+                        if (j == 0) { //первый луч
+                            VW.coord[0].x = VRL[j].coord[1].x;
+                            VW.coord[0].y = VRL[j].coord[1].y;
+                        }
+                        /*else if (j == VRL.size() - 1) { // последний луч
+                            VW.coord[1].x = VRL[j].coord[1].x;
+                            VW.coord[1].y = VRL[j].coord[1].y;
+                            if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Северо-восточная часть
+                                VW.coord[0].x = walls[i]->coord[1].x;
+                                VW.coord[0].y = walls[i]->coord[1].y;
+                            }
+                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Юго-восточная часть
+                                VW.coord[0].x = walls[i]->coord[1].x;
+                                VW.coord[0].y = walls[i]->coord[1].y;
+                            }
+                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Юго-западная часть
+                                VW.coord[0].x = walls[i]->coord[0].x;
+                                VW.coord[0].y = walls[i]->coord[0].y;
+                            }
+                            else if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Северо-западная часть
+                                VW.coord[0].x = walls[i]->coord[0].x;
+                                VW.coord[0].y = walls[i]->coord[0].y;
+                            }
+                            t.push_back(VW);
+                        }*/
+                        else { //не первый луч (пока работает)
+                            VW.coord[1].x = VRL[j].coord[1].x;
+                            VW.coord[1].y = VRL[j].coord[1].y;
+                            if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Северо-восточная часть
+                                VW.coord[0].x = walls[i]->coord[1].x;
+                                VW.coord[0].y = walls[i]->coord[1].y;
+                            }
+                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Юго-восточная часть
+                                VW.coord[0].x = walls[i]->coord[1].x;
+                                VW.coord[0].y = walls[i]->coord[1].y;
+                            }
+                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Юго-западная часть
+                                VW.coord[0].x = walls[i]->coord[0].x;
+                                VW.coord[0].y = walls[i]->coord[0].y;
+                            }
+                            else if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Северо-западная часть
+                                VW.coord[0].x = walls[i]->coord[0].x;
+                                VW.coord[0].y = walls[i]->coord[0].y;
+                            }
+                        }
+                        
                         isbeginwall = false;
                     }
                     else {
@@ -64,21 +109,38 @@ namespace ptd {
                         VW.coord[1].y = VRL[j].coord[1].y;
                     }
                 }
-                else {
-                    t.push_back(VW);
-                    isbeginwall = true;
+                else if(!isbeginwall) {
+                    if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Северо-восточная часть
+                        VW.coord[1].x = walls[i]->coord[1].x;
+                        VW.coord[1].y = walls[i]->coord[1].y;
+                    }
+                    else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Юго-восточная часть
+                        VW.coord[1].x = walls[i]->coord[0].x;
+                        VW.coord[1].y = walls[i]->coord[0].y;
+                    }
+                    else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Юго-западная часть
+                        VW.coord[1].x = walls[i]->coord[0].x;
+                        VW.coord[1].y = walls[i]->coord[0].y;
+                    }
+                    else if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Северо-западная часть
+                        VW.coord[1].x = walls[i]->coord[1].x;
+                        VW.coord[1].y = walls[i]->coord[1].y;
+                    }
+                    break;
                 }
             }
-            t.push_back(VW);
+            if (isin) { t.push_back(VW); }
             isbeginwall = true;
+            isin = false;
         }
+        //std::cout << t.size() << std::endl;
         return t;
     }
 
     std::vector<RayLine> GameManager::GetCrossingRayLines() {
         std::vector<RayLine> VRL;
         RayLine RL;
-        double interval = 0.05;
+        double interval = 0.01;
         double leftview = view + FOV_DIVIDE_BY2;
         double rightview = view - FOV_DIVIDE_BY2;
         double currentview = leftview;
@@ -102,62 +164,43 @@ namespace ptd {
                 b1 = VRL[i].coord[0].y - (k1 * VRL[i].coord[0].x);
             }
             for (int j = 0; j < walls.size(); j++) {
-                
                 if (walls[j]->coord[0].x == walls[j]->coord[1].x) {
                     xp = walls[j]->coord[0].x;
                     yp = (k1 * xp) + b1;
-                    if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
-                    if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
-                    if ((VRL[i].coord[0].x < VRL[i].coord[1].x) && (xp < VRL[i].coord[0].x)) { continue; }
-                    if ((VRL[i].coord[0].x > VRL[i].coord[1].x) && (xp > VRL[i].coord[0].x)) { continue; }
-                    VRL[i].coord[1].x = xp;
-                    VRL[i].coord[1].y = yp;
-                    VRL[i].length = sqrt(((xp - VRL[i].coord[0].x) * (xp - VRL[i].coord[0].x)) + ((yp - VRL[i].coord[0].y) * (yp - VRL[i].coord[0].y)));
-                    if (VRL[i].length > minlength) {
-                        VRL[i].length = minlength;
-                        VRL[i].coord[1].x = xm;
-                        VRL[i].coord[1].y = ym;
-                    }
-                    else {
-                        minlength = VRL[i].length;
-                        xm = xp;
-                        ym = yp;
-                    }
                 }
                 else {
                     k2 = (walls[j]->coord[0].y - walls[j]->coord[1].y) / (walls[j]->coord[0].x - walls[j]->coord[1].x);
                     b2 = walls[j]->coord[0].y - (k2 * walls[j]->coord[0].x);
-
                     if (k1 == k2) { continue; }
                     xp = (b2 - b1) / (k1 - k2);
                     yp = (k2 * xp) + b2;
-                    if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
-                    if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
-                    if ((VRL[i].coord[0].x < VRL[i].coord[1].x) && (xp < VRL[i].coord[0].x)) { continue; }
-                    if ((VRL[i].coord[0].x > VRL[i].coord[1].x) && (xp > VRL[i].coord[0].x)) { continue; }
+                }
+                if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
+                if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
+                if ((VRL[i].coord[0].x < VRL[i].coord[1].x) && (xp < VRL[i].coord[0].x)) { continue; }
+                if ((VRL[i].coord[0].x > VRL[i].coord[1].x) && (xp > VRL[i].coord[0].x)) { continue; }
 
-                    VRL[i].coord[1].x = xp;
-                    VRL[i].coord[1].y = yp;
+                VRL[i].coord[1].x = xp;
+                VRL[i].coord[1].y = yp;
 
-                    VRL[i].length = sqrt(((xp - VRL[i].coord[0].x) * (xp - VRL[i].coord[0].x)) + ((yp - VRL[i].coord[0].y) * (yp - VRL[i].coord[0].y)));
+                VRL[i].length = sqrt(((xp - VRL[i].coord[0].x) * (xp - VRL[i].coord[0].x)) + ((yp - VRL[i].coord[0].y) * (yp - VRL[i].coord[0].y)));
                     
-                    if (VRL[i].length > minlength) {
-                        VRL[i].length = minlength;
-                        VRL[i].coord[1].x = xm;
-                        VRL[i].coord[1].y = ym;
-                    }
-                    else {
-                        minlength = VRL[i].length;
-                        xm = xp;
-                        ym = yp;
-                    }
+                if (VRL[i].length > minlength) {
+                    VRL[i].length = minlength;
+                    VRL[i].coord[1].x = xm;
+                    VRL[i].coord[1].y = ym;
+                }
+                else {
+                    minlength = VRL[i].length;
+                    xm = xp;
+                    ym = yp;
                 }
             }
             minlength = DBL_MAX;
             xm = 999;
             ym = 999;
         }
-
+        std::cout << VRL.size() << std::endl;
         return VRL;
     }
 
@@ -182,27 +225,21 @@ namespace ptd {
         if (wall.coord[0].x == wall.coord[1].x) {
             xp = wall.coord[0].x;
             yp = (k1 * xp) + b1;
-            if ((xp > std::max(wall.coord[0].x, wall.coord[1].x)) || (xp < std::min(wall.coord[0].x, wall.coord[1].x))) {return a;}
-            if ((yp > std::max(wall.coord[0].y, wall.coord[1].y)) || (yp < std::min(wall.coord[0].y, wall.coord[1].y))) {return a;}
-            if ((RL.coord[0].x < RL.coord[1].x) && (xp < RL.coord[0].x)) {return a;}
-            if ((RL.coord[0].x > RL.coord[1].x) && (xp > RL.coord[0].x)) {return a;}
-            a.distance = sqrt(((xp - RL.coord[0].x) * (xp - RL.coord[0].x)) + ((yp - RL.coord[0].y) * (yp - RL.coord[0].y)));
-            a.isCrossing = true;
         }
         else {
             k2 = (wall.coord[0].y - wall.coord[1].y) / (wall.coord[0].x - wall.coord[1].x);
             b2 = wall.coord[0].y - (k2 * wall.coord[0].x);
-            if (k1 == k2) {return a;}
+            if (k1 == k2) { return a; }
             xp = (b2 - b1) / (k1 - k2);
             yp = (k2 * xp) + b2;
-            if ((xp > std::max(wall.coord[0].x, wall.coord[1].x)) || (xp < std::min(wall.coord[0].x, wall.coord[1].x))) {return a;}
-            if ((yp > std::max(wall.coord[0].y, wall.coord[1].y)) || (yp < std::min(wall.coord[0].y, wall.coord[1].y))) { return a; }
-            if ((RL.coord[0].x < RL.coord[1].x) && (xp < RL.coord[0].x)) { return a; }
-            if ((RL.coord[0].x > RL.coord[1].x) && (xp > RL.coord[0].x)) { return a; }
-
-            a.distance = sqrt(((xp - RL.coord[0].x) * (xp - RL.coord[0].x)) + ((yp - RL.coord[0].y) * (yp - RL.coord[0].y)));
-            a.isCrossing = true;
         }
+        if ((xp > std::max(wall.coord[0].x, wall.coord[1].x)) || (xp < std::min(wall.coord[0].x, wall.coord[1].x))) {return a;}
+        if ((yp > std::max(wall.coord[0].y, wall.coord[1].y)) || (yp < std::min(wall.coord[0].y, wall.coord[1].y))) { return a; }
+        if ((RL.coord[0].x < RL.coord[1].x) && (xp < RL.coord[0].x)) { return a; }
+        if ((RL.coord[0].x > RL.coord[1].x) && (xp > RL.coord[0].x)) { return a; }
+
+        a.distance = sqrt(((xp - RL.coord[0].x) * (xp - RL.coord[0].x)) + ((yp - RL.coord[0].y) * (yp - RL.coord[0].y)));
+        a.isCrossing = true;
         return a;
     }
 
@@ -237,47 +274,30 @@ namespace ptd {
                 if (walls[j]->coord[0].x == walls[j]->coord[1].x) {
                     xp = walls[j]->coord[0].x;
                     yp = (k1 * xp) + b1;
-                    if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
-                    if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
-                    if ((playerPos.x < VRL[i].coord[1].x) && (xp < playerPos.x)) { continue; }
-                    if ((playerPos.x > VRL[i].coord[1].x) && (xp > playerPos.x)) { continue; }
-                    VRL[i].length = sqrt(((xp - playerPos.x) * (xp - playerPos.x)) + ((yp - playerPos.y) * (yp - playerPos.y)));
-                    if (VRL[i].length > minlength) {
-                        VRL[i].length = minlength;
-                        VRL[i].coord[1].x = xm;
-                        VRL[i].coord[1].y = ym;
-                    }
-                    else {
-                        minlength = VRL[i].length;
-                        xm = xp;
-                        ym = yp;
-                    }
                 }
                 else {
                     k2 = (walls[j]->coord[0].y - walls[j]->coord[1].y) / (walls[j]->coord[0].x - walls[j]->coord[1].x);
                     b2 = walls[j]->coord[0].y - (k2 * walls[j]->coord[0].x);
-
                     if (k1 == k2) { continue; }
                     xp = (b2 - b1) / (k1 - k2);
                     yp = (k2 * xp) + b2;
-                    if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
-                    if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
-                    if ((playerPos.x < VRL[i].coord[1].x) && (xp < playerPos.x)) { continue; }
-                    if ((playerPos.x > VRL[i].coord[1].x) && (xp > playerPos.x)) { continue; }
+                }
+                if ((xp > std::max(walls[j]->coord[0].x, walls[j]->coord[1].x)) || (xp < std::min(walls[j]->coord[0].x, walls[j]->coord[1].x))) { continue; }
+                if ((yp > std::max(walls[j]->coord[0].y, walls[j]->coord[1].y)) || (yp < std::min(walls[j]->coord[0].y, walls[j]->coord[1].y))) { continue; }
+                if ((playerPos.x < VRL[i].coord[1].x) && (xp < playerPos.x)) { continue; }
+                if ((playerPos.x > VRL[i].coord[1].x) && (xp > playerPos.x)) { continue; }
 
+                VRL[i].length = sqrt(((xp - playerPos.x) * (xp - playerPos.x)) + ((yp - playerPos.y) * (yp - playerPos.y)));
 
-                    VRL[i].length = sqrt(((xp - playerPos.x) * (xp - playerPos.x)) + ((yp - playerPos.y) * (yp - playerPos.y)));
-
-                    if (VRL[i].length > minlength) {
-                        VRL[i].length = minlength;
-                        VRL[i].coord[1].x = xm;
-                        VRL[i].coord[1].y = ym;
-                    }
-                    else {
-                        minlength = VRL[i].length;
-                        xm = xp;
-                        ym = yp;
-                    }
+                if (VRL[i].length > minlength) {
+                    VRL[i].length = minlength;
+                    VRL[i].coord[1].x = xm;
+                    VRL[i].coord[1].y = ym;
+                }
+                else {
+                    minlength = VRL[i].length;
+                    xm = xp;
+                    ym = yp;
                 }
                 if (VRL[i].length <= delta) {
                     RL.coord[1].x = VRL[i].coord[0].x;
@@ -292,7 +312,6 @@ namespace ptd {
         }
 
         return RL;
-
     }*/
 
     GameManager::GameManager()
@@ -418,7 +437,7 @@ namespace ptd {
         // стены - синий; взгляд - зеленый; видимые стены - красный; игрок - белый
         double koef = 45;
         double ray = info.viewLeft;
-        double interval = 0.05;
+        double interval = 0.01;
         sf::VertexArray vertexWalls(sf::PrimitiveType::Lines, 0);
         double halfScreenX = window->getSize().x / 2;
         double halfScreenY = window->getSize().y / 2;
