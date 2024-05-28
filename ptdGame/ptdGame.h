@@ -58,16 +58,14 @@ namespace ptd {
 		VisibleWall(Coord, Coord);
 		VisibleWall();
 	};
-	/*struct VisibleWall // класс для отрисовки стен  псевдо-3D; углы считаются слева (экрана), от 0 до FOV
+	struct VisibleWall3D
 	{
-		double leftBound_angle;
-		double leftBound_distance;
-		double rightBound_angle;
-		double rightBound_distance;
-		Wall* wall;
+		double angle;
+		double distance;
 	public:
-		VisibleWall();
-	};*/
+		VisibleWall3D(double, double);
+		VisibleWall3D();
+	};
 	struct PrintInfo2D // передается от GameManager к Interpreter (что теперь нужно рисовать; в ответ на UpdateInfo)
 	{
 		//temp
@@ -102,9 +100,12 @@ namespace ptd {
 		Coord playerPos;
 		double view;
 
-		std::vector<VisibleWall> GetVisibleWalls();
+		bool ispointin(Coord, VisibleWall);
+		std::vector<VisibleWall> SortVisibleWall(std::vector<VisibleWall>);
+		std::vector<VisibleWall> GetVisibleWalls(); // определяет видимые стены
 		std::vector<RayLine> GetCrossingRayLines(); // определяет длину каждого луча в зависимости от расстояния до стены
-		RayLine GetCollisionRayLines();
+		std::vector<VisibleWall3D> GetAngleDistance(std::vector<VisibleWall>);
+		//RayLine GetCollisionRayLines();
 		CrossingRayLineInfo CrossingRayLine(const Wall&);
 
 	public:
