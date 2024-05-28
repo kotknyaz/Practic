@@ -200,7 +200,6 @@ namespace ptd {
             xm = 999;
             ym = 999;
         }
-        std::cout << VRL.size() << std::endl;
         return VRL;
     }
 
@@ -314,6 +313,74 @@ namespace ptd {
         return RL;
     }*/
 
+    std::vector<VisibleWall3D> GameManager::GetAngleDistance(std::vector<VisibleWall> t) {
+        t = SortVisibleWall(t);
+        Coord a;
+        RayLine RL;
+        RL.coord[1].x = cos(view) + playerPos.x;
+        RL.coord[1].y = sin(view) + playerPos.y;
+        std::vector<VisibleWall3D> VW3D;
+        VisibleWall3D VW;
+        std::vector<RayLine> VRL = GetCrossingRayLines();
+        if (t.size() == 1) { // Если видим сплошную стену
+            VW3D.push_back(VisibleWall3D(-1 * ((RL.coord[1].x - playerPos.x) * (VRL[0].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[0].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[0].coord[1].x - playerPos.x) * (VRL[0].coord[1].x - playerPos.x) + (VRL[0].coord[1].y - playerPos.y) * (VRL[0].coord[1].y - playerPos.y))), VRL[0].length));
+            VW3D.push_back(VisibleWall3D(((RL.coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[VRL.size() - 1].coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (VRL[VRL.size() - 1].coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y))), VRL[VRL.size() - 1].length));
+            return VW3D;
+        }
+        // Если видим углы
+        VW3D.push_back(VisibleWall3D(-1 * ((RL.coord[1].x - playerPos.x) * (VRL[0].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[0].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[0].coord[1].x - playerPos.x) * (VRL[0].coord[1].x - playerPos.x) + (VRL[0].coord[1].y - playerPos.y) * (VRL[0].coord[1].y - playerPos.y))), VRL[0].length));
+        bool isbeginwall = true;
+        int k;
+
+        for (int i = 0; i < VRL.size(); i++) {
+            for (int j = 0; j < t.size(); j++) {
+                if (ispointin(Coord(VRL[i].coord[1].x, VRL[i].coord[1].y), t[j])) {
+                    if (!isbeginwall) {
+                        if (k == j) {
+                            break;
+                        }
+                        else {
+                            k = j;
+                        }
+                    }
+                    else {
+                        isbeginwall = false;
+                        k = j;
+                        break;
+                    }
+                    // Определяем угол стены, который мы видим
+                    if (sqrt((VRL[i].coord[1].x - t[j].coord[0].x) * (VRL[i].coord[1].x - t[j].coord[0].x) + (VRL[i].coord[1].y - t[j].coord[0].y) * (VRL[i].coord[1].y - t[j].coord[0].y)) < sqrt((VRL[i + 1].coord[1].x - t[j].coord[0].x) * (VRL[i + 1].coord[1].x - t[j].coord[0].x) + (VRL[i + 1].coord[1].y - t[j].coord[0].y) * (VRL[i + 1].coord[1].y - t[j].coord[0].y))) {
+                        a.x = t[j].coord[0].x;
+                        a.y = t[j].coord[0].y;
+                    }
+                    else if (i == VRL.size() - 1) {
+                        if (sqrt((VRL[i - 2].coord[1].x - t[j].coord[0].x) * (VRL[i - 2].coord[1].x - t[j].coord[0].x) + (VRL[i - 2].coord[1].y - t[j].coord[0].y) * (VRL[i - 2].coord[1].y - t[j].coord[0].y)) < sqrt((VRL[i - 1].coord[1].x - t[j].coord[0].x) * (VRL[i - 1].coord[1].x - t[j].coord[0].x) + (VRL[i - 1].coord[1].y - t[j].coord[0].y) * (VRL[i - 1].coord[1].y - t[j].coord[0].y))) {
+                            a.x = t[j].coord[0].x;
+                            a.y = t[j].coord[0].y;
+                        }
+                        else {
+                            a.x = t[j].coord[1].x;
+                            a.y = t[j].coord[1].y;
+                        }
+                    }
+                    else {
+                        a.x = t[j].coord[1].x;
+                        a.y = t[j].coord[1].y;
+                    }
+                    VW.distance = sqrt((playerPos.x - a.x) * (playerPos.x - a.x) + (playerPos.y - a.y) * (playerPos.y - a.y));
+                    VW.angle = ((RL.coord[1].x - playerPos.x) * (a.x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (a.y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((a.x - playerPos.x) * (a.x - playerPos.x) + (a.y - playerPos.y) * (a.y - playerPos.y)));
+                    if (VW.angle > 1) { VW.angle = 1; }
+                    else if (VW.angle < -1) { VW.angle = -1; }
+                    VW.angle = acos(VW.angle);
+                    if (i < VRL.size() / 2) { VW.angle *= -1; }
+                    VW3D.push_back(VW);
+                }
+            }
+        }
+        VW3D.push_back(VisibleWall3D(((RL.coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[VRL.size() - 1].coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (VRL[VRL.size() - 1].coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y))), VRL[VRL.size() - 1].length));
+        return VW3D;
+    }
+
     GameManager::GameManager()
     {
         clock = new sf::Clock();
@@ -322,10 +389,10 @@ namespace ptd {
         walls.push_back(new Wall(Coord(3, -4), Coord(3, 4)));
         walls.push_back(new Wall(Coord(-2, -4), Coord(3, -4)));
         walls.push_back(new Wall(Coord(-2, -4), Coord(-2, 4)));
-        walls.push_back(new Wall(Coord(-0.2, 0.4), Coord(0.3, 0.4)));
-        walls.push_back(new Wall(Coord(0.3, -0.4), Coord(0.3, 0.4)));
-        walls.push_back(new Wall(Coord(-0.2, -0.4), Coord(0.3, -0.4)));
-        walls.push_back(new Wall(Coord(-0.2, -0.4), Coord(-0.2, 0.4)));
+        //walls.push_back(new Wall(Coord(-0.2, 0.4), Coord(0.3, 0.4)));
+        //walls.push_back(new Wall(Coord(0.3, -0.4), Coord(0.3, 0.4)));
+        //walls.push_back(new Wall(Coord(-0.2, -0.4), Coord(0.3, -0.4)));
+        //walls.push_back(new Wall(Coord(-0.2, -0.4), Coord(-0.2, 0.4)));
     }
 
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
@@ -387,20 +454,6 @@ namespace ptd {
                     window->close();
                     break;
                 }
-                /*
-                case sf::Event::KeyPressed:         //закрытие окна
-                {
-                    if (event.key.code == sf::Keyboard::A)
-                    {
-                        toSent.viewChange += 1;
-                    }
-                    if (event.key.code == sf::Keyboard::D)
-                    {
-                        toSent.viewChange -= 1;
-                    }
-                    break;
-                }
-                */
                 }
             }
 
@@ -492,6 +545,57 @@ namespace ptd {
     }
 
 
+    bool GameManager::ispointin(Coord a, VisibleWall VW) { // лежит ли точка на прямой
+        double dx1, dy1, dx, dy, s;
+        dx1 = VW.coord[1].x - VW.coord[0].x;
+        dy1 = VW.coord[1].y - VW.coord[0].y;
+        dx = a.x - VW.coord[0].x;
+        dy = a.y - VW.coord[0].y;
+        s = dx1 * dy - dx * dy1;
+        if (s == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    std::vector<VisibleWall> GameManager::SortVisibleWall(std::vector<VisibleWall> t) {
+        double tempx, tempy;
+        for (int i = 0; i < t.size(); i++) {
+            if ((t[i].coord[0].x > t[i].coord[1].x) && (t[i].coord[0].y > t[i].coord[1].y)) {
+                tempx = t[i].coord[0].x;
+                tempy = t[i].coord[0].y;
+                t[i].coord[0].x = t[i].coord[1].x;
+                t[i].coord[0].y = t[i].coord[1].y;
+                t[i].coord[1].x = tempx;
+                t[i].coord[1].y = tempy;
+            }
+            else if ((t[i].coord[0].x > t[i].coord[1].x) && (t[i].coord[0].y < t[i].coord[1].y)) {
+                tempx = t[i].coord[0].x;
+                tempy = t[i].coord[0].y;
+                t[i].coord[0].x = t[i].coord[1].x;
+                t[i].coord[0].y = t[i].coord[1].y;
+                t[i].coord[1].x = tempx;
+                t[i].coord[1].y = tempy;
+            }
+            else if ((t[i].coord[0].x == t[i].coord[1].x) && (t[i].coord[0].y > t[i].coord[1].y)) {
+                tempx = t[i].coord[0].x;
+                tempy = t[i].coord[0].y;
+                t[i].coord[0].x = t[i].coord[1].x;
+                t[i].coord[0].y = t[i].coord[1].y;
+                t[i].coord[1].x = tempx;
+                t[i].coord[1].y = tempy;
+            }
+            else if ((t[i].coord[0].x > t[i].coord[1].x) && (t[i].coord[0].y == t[i].coord[1].y)) {
+                tempx = t[i].coord[0].x;
+                tempy = t[i].coord[0].y;
+                t[i].coord[0].x = t[i].coord[1].x;
+                t[i].coord[0].y = t[i].coord[1].y;
+                t[i].coord[1].x = tempx;
+                t[i].coord[1].y = tempy;
+            }
+        }
+        return t;
+    }
 
     Coord::Coord(double newX, double newY) : x(newX), y(newY) {}
 
@@ -534,9 +638,15 @@ namespace ptd {
 
     VisibleWall::VisibleWall() {}
 
+    VisibleWall3D::VisibleWall3D() {}
+
+    VisibleWall3D::VisibleWall3D(double a, double b) {
+        angle = a;
+        distance = b;
+    }
+
     CrossingRayLineInfo::CrossingRayLineInfo() {
         this->distance = 0;
         this->isCrossing = false;
     }
 }
-
