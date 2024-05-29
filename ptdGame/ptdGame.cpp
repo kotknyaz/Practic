@@ -53,19 +53,11 @@ namespace ptd {
         bool isin = false;
         for (int i = 0; i < walls.size(); i++) {
             for (int j = 0; j < VRL.size(); j++) {
-                if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
+                if (ispointin(Coord(VRL[j].coord[1].x, VRL[j].coord[1].y), VisibleWall(Coord(walls[i]->coord[0].x, walls[i]->coord[0].y), Coord(walls[i]->coord[1].x, walls[i]->coord[1].y)))) {
                     isin = true;
                     if (isbeginwall) {
-                        if (j == 0) {
-                            VW.coord[0].x = VRL[j].coord[1].x;
-                            VW.coord[0].y = VRL[j].coord[1].y;
-                        }
-                        else {
-                            VW.coord[0].x = VRL[j].coord[1].x;
-                            VW.coord[0].y = VRL[j].coord[1].y;
-                            //VW.coord[0].x = VRL[j - 1].coord[1].x;
-                            //VW.coord[0].x = VRL[j - 1].coord[1].x;
-                        }
+                        VW.coord[0].x = VRL[j].coord[1].x;
+                        VW.coord[0].y = VRL[j].coord[1].y;
                         isbeginwall = false;
                     }
                     else {
@@ -77,7 +69,9 @@ namespace ptd {
                 else if (!isbeginwall) {
                     VW.coord[1].x = VRL[j - 1].coord[1].x;
                     VW.coord[1].y = VRL[j - 1].coord[1].y;
-                    break;
+                    t.push_back(VW);
+                    isbeginwall = true;
+                    isin = false;
                 }
             }
             if (isin) { t.push_back(VW); }
@@ -88,101 +82,6 @@ namespace ptd {
         
         return t;
     }
-
-    /*std::vector<VisibleWall> GameManager::GetVisibleWalls()
-    {
-        std::vector<RayLine> VRL = GameManager::GetCrossingRayLines();
-        std::vector<VisibleWall> t;
-        VisibleWall VW;
-
-        bool isbeginwall = true;
-        bool isotherwall = false;
-        bool isin = false;
-        for (int i = 0; i < walls.size(); i++) {
-            for (int j = 0; j < VRL.size(); j++) {
-                if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
-                    isin = true;
-                    if (isbeginwall) {
-                        if (j == 0) { //первый луч
-                            VW.coord[0].x = VRL[j].coord[1].x;
-                            VW.coord[0].y = VRL[j].coord[1].y;
-                        }
-                        /*else if (j == VRL.size() - 1) { // последний луч
-                            VW.coord[1].x = VRL[j].coord[1].x;
-                            VW.coord[1].y = VRL[j].coord[1].y;
-                            if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Северо-восточная часть
-                                VW.coord[0].x = walls[i]->coord[1].x;
-                                VW.coord[0].y = walls[i]->coord[1].y;
-                            }
-                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Юго-восточная часть
-                                VW.coord[0].x = walls[i]->coord[1].x;
-                                VW.coord[0].y = walls[i]->coord[1].y;
-                            }
-                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Юго-западная часть
-                                VW.coord[0].x = walls[i]->coord[0].x;
-                                VW.coord[0].y = walls[i]->coord[0].y;
-                            }
-                            else if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Северо-западная часть
-                                VW.coord[0].x = walls[i]->coord[0].x;
-                                VW.coord[0].y = walls[i]->coord[0].y;
-                            }
-                            t.push_back(VW);
-                        }
-                        else { //не первый луч (пока работает)
-                            VW.coord[1].x = VRL[j].coord[1].x;
-                            VW.coord[1].y = VRL[j].coord[1].y;
-                            if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Северо-восточная часть
-                                VW.coord[0].x = walls[i]->coord[1].x;
-                                VW.coord[0].y = walls[i]->coord[1].y;
-                            }
-                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Юго-восточная часть
-                                VW.coord[0].x = walls[i]->coord[1].x;
-                                VW.coord[0].y = walls[i]->coord[1].y;
-                            }
-                            else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Юго-западная часть
-                                VW.coord[0].x = walls[i]->coord[0].x;
-                                VW.coord[0].y = walls[i]->coord[0].y;
-                            }
-                            else if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Северо-западная часть
-                                VW.coord[0].x = walls[i]->coord[0].x;
-                                VW.coord[0].y = walls[i]->coord[0].y;
-                            }
-                        }
-                        
-                        isbeginwall = false;
-                    }
-                    else {
-                        VW.coord[1].x = VRL[j].coord[1].x;
-                        VW.coord[1].y = VRL[j].coord[1].y;
-                    }
-                }
-                else if(!isbeginwall) {
-                    if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Северо-восточная часть
-                        VW.coord[1].x = walls[i]->coord[1].x;
-                        VW.coord[1].y = walls[i]->coord[1].y;
-                    }
-                    else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x < VRL[j].coord[1].x)) { //Юго-восточная часть
-                        VW.coord[1].x = walls[i]->coord[0].x;
-                        VW.coord[1].y = walls[i]->coord[0].y;
-                    }
-                    else if ((VRL[j].coord[0].y > VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Юго-западная часть
-                        VW.coord[1].x = walls[i]->coord[0].x;
-                        VW.coord[1].y = walls[i]->coord[0].y;
-                    }
-                    else if ((VRL[j].coord[0].y < VRL[j].coord[1].y) && (VRL[j].coord[0].x > VRL[j].coord[1].x)) { //Северо-западная часть
-                        VW.coord[1].x = walls[i]->coord[1].x;
-                        VW.coord[1].y = walls[i]->coord[1].y;
-                    }
-                    break;
-                }
-            }
-            if (isin) { t.push_back(VW); }
-            isbeginwall = true;
-            isin = false;
-        }
-        //std::cout << t.size() << std::endl;
-        return t;
-    }*/
 
     std::vector<RayLine> GameManager::GetCrossingRayLines() {
         std::vector<RayLine> VRL;
@@ -436,9 +335,6 @@ namespace ptd {
         }
         VW3D.push_back(VisibleWall3D(((RL.coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[VRL.size() - 1].coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (VRL[VRL.size() - 1].coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y))), VRL[VRL.size() - 1].length));
        // std::cout << " --- " << std::endl;
-        for (int i = 0; i < VW3D.size(); i++) {
-            std::cout << VW3D[i].angle << " --- " << VW3D[i].distance << std::endl;
-        }
         return VW3D;
     }
 
@@ -456,6 +352,13 @@ namespace ptd {
         walls.push_back(new Wall(Coord(-5, 5), Coord(6, 5)));
         walls.push_back(new Wall(Coord(6, 5), Coord(6, 2)));
         walls.push_back(new Wall(Coord(6, 2), Coord(3, 2)));
+        walls.push_back(new Wall(Coord(-3, 1), Coord(-2, 3)));
+        walls.push_back(new Wall(Coord(-2, 3), Coord(-1, 1)));
+        walls.push_back(new Wall(Coord(-1, 1), Coord(-3, 1)));
+        //walls.push_back(new Wall(Coord(-2, 1), Coord(-2, 2)));
+        //walls.push_back(new Wall(Coord(-2, 2), Coord(-1, 2)));
+        //walls.push_back(new Wall(Coord(-1, 2), Coord(-1, 1)));
+        //walls.push_back(new Wall(Coord(-1, 1), Coord(-2, 1)));
     }
 
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
