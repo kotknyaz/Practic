@@ -389,10 +389,6 @@ namespace ptd {
         walls.push_back(new Wall(Coord(3, -4), Coord(3, 4)));
         walls.push_back(new Wall(Coord(-2, -4), Coord(3, -4)));
         walls.push_back(new Wall(Coord(-2, -4), Coord(-2, 4)));
-        //walls.push_back(new Wall(Coord(-0.2, 0.4), Coord(0.3, 0.4)));
-        //walls.push_back(new Wall(Coord(0.3, -0.4), Coord(0.3, 0.4)));
-        //walls.push_back(new Wall(Coord(-0.2, -0.4), Coord(0.3, -0.4)));
-        //walls.push_back(new Wall(Coord(-0.2, -0.4), Coord(-0.2, 0.4)));
     }
 
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
@@ -415,10 +411,10 @@ namespace ptd {
                                                     // и т.д. (visibleWalls[1]..., visibleWalls[2]...)
         //RL = GetCollisionRayLines();
  
-        //----------------------------------------- Изменение положения игрока относительно направления взгляда -----------------------------------------
+        // Изменение положения игрока относительно направления взгляда
         playerPos.x += updateInfo.playerPosChange * cos(view);
         playerPos.y += updateInfo.playerPosChange * sin(view);
-        //---------------------------------------------------------
+        
         // temp
         printInfo.walls = walls;
         printInfo.playerPos.x += playerPos.x;
@@ -454,7 +450,6 @@ namespace ptd {
 
     int Interpreter::GameProcess()
     {
-        bool rejim = true;
 
         while (window->isOpen())
         {
@@ -495,12 +490,8 @@ namespace ptd {
                 toSent.playerPosChange -= 0.05;
             }
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Tab))
-            {
-                rejim = !rejim;
-            }
 
-            if(rejim)
+            if(!sf::Keyboard::isKeyPressed(sf::Keyboard::Tab))
                 Print3D( gm->Update3D(toSent) );
             else
                 Print2D(gm->Update2D(toSent));
@@ -508,32 +499,44 @@ namespace ptd {
     }
 
 
+
     int Interpreter::Print3D(PrintInfo3D& info)
     {
-        double koef = 0.5;
+        double koef = 0.45;
+        //double k1 = 0.5;
         sf::VertexArray verWalls(sf::PrimitiveType::Lines, 0);
 
         for (int i = 0; i < info.walls.size(); ++i)
         {
             double x, y_half;
             x = window->getSize().x * (info.walls[i].angle + FOV_DIVIDE_BY2) / FOV;
-            y_half = koef * window->getSize().y / info.walls[i].distance;
+            //std::cout << x << std::endl;
+            y_half = koef * window->getSize().y / info.walls[i].distance; //* acos(k1 / info.walls[i].distance);
 
-            std::cout << x << " " << y_half << std::endl;
+            //std::cout << x << " " << y_half << std::endl;
 
             if (i > 0)
             {
-                verWalls.append(sf::Vertex(verWalls[i - 2].position, sf::Color::Red));
+                int t = (i - 1) * 6;
+                verWalls.append(sf::Vertex(verWalls[t].position, sf::Color::Red));
                 verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 - y_half), sf::Color::Red));
 
-                verWalls.append(sf::Vertex(verWalls[i - 1].position, sf::Color::Green));
+                verWalls.append(sf::Vertex(verWalls[t + 1].position, sf::Color::Green));
                 verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 + y_half), sf::Color::Green));
             }
 
-            verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 - y_half), sf::Color::Blue));
-            verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 + y_half), sf::Color::Blue));
+            if (i == 0)
+            {
+                verWalls.append(sf::Vertex(sf::Vector2f(0, window->getSize().y / 2 - y_half), sf::Color::Blue));
+                verWalls.append(sf::Vertex(sf::Vector2f(0, window->getSize().y / 2 + y_half), sf::Color::Blue));
+            }
+            else
+            {
+                verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 - y_half), sf::Color::Blue));
+                verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 + y_half), sf::Color::Blue));
+            }
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
 
         window->clear(sf::Color::White);
         window->draw(verWalls);
@@ -555,9 +558,6 @@ namespace ptd {
 
         for (int i = 0; i < info.walls.size(); ++i)
         {
-            //std::cout << i << "\n";
-            //std::cout << info.walls[i]->coord[0].x << " " << info.walls[i]->coord[0].y << std::endl;
-            //std::cout << info.walls[i]->coord[1].x << " " << info.walls[i]->coord[1].y << std::endl;
             vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (-info.walls[i]->coord[0].x + info.playerPos.x) * koef,
                 halfScreenY - (info.walls[i]->coord[0].y - info.playerPos.y) * koef), sf::Color::Blue));
             vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (-info.walls[i]->coord[1].x + info.playerPos.x) * koef,
@@ -584,20 +584,10 @@ namespace ptd {
                 halfScreenY - sin(ray) * info.VRL[i].length * koef), sf::Color::Green));
             ray -= interval;
         }
-        /*
-        sf::VertexArray vertexVisibleWalls(sf::PrimitiveType::Lines, 0);
-        for (int i = 0; i < info.visibleWalls.size(); ++i)
-        {
-            vertexWalls.append(sf::Vertex(sf::Vector2f(halfScreenX - (info.visibleWalls[i].x + info.playerPos.x) * koef,
-                halfScreenY - (info.visibleWalls[i].y - info.playerPos.y) * koef), sf::Color::Red));
-        }
-        */
 
-
-        //window->draw(vertexPlayer);
+        window->draw(vertexPlayer);
         window->draw(vertexWalls);
         window->draw(vertexRays);
-        //window->draw(vertexVisibleWalls);
         window->display();
         return 0;
     }
@@ -663,7 +653,6 @@ namespace ptd {
     PrintInfo2D::PrintInfo2D()
     {
         playerPos = Coord(0.f, 0.f);
-        //walls = std::vector<Wall*>();
     }
 
 
@@ -694,6 +683,13 @@ namespace ptd {
         coord[1].y = b.y;
     }
 
+    GameManager::~GameManager() {
+        delete clock;
+
+        for (int i = 0; i < walls.size(); i++) {
+            delete walls[i];
+        }
+    }
     VisibleWall::VisibleWall() {}
 
     VisibleWall3D::VisibleWall3D() {}

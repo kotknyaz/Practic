@@ -68,7 +68,6 @@ namespace ptd {
 	};
 	struct PrintInfo2D // передается от GameManager к Interpreter (что теперь нужно рисовать; в ответ на UpdateInfo)
 	{
-		//temp
 		Coord playerPos;
 		std::vector<Wall*> walls;
 		std::vector<RayLine> VRL;
@@ -113,6 +112,7 @@ namespace ptd {
 
 	public:
 		GameManager(); // пока пусто
+		~GameManager();
 		PrintInfo2D Update2D(UpdateInfo&);
 		PrintInfo3D Update3D(UpdateInfo&);
 	};
