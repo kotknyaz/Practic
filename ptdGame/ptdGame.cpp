@@ -362,6 +362,8 @@ namespace ptd {
 
     std::vector<VisibleWall3D> GameManager::GetAngleDistance(std::vector<VisibleWall> t) {
         t = SortVisibleWall(t);
+        double delta = 0.01;
+        double temp;
         Coord a;
         RayLine RL;
         RL.coord[1].x = cos(view) + playerPos.x;
@@ -422,6 +424,12 @@ namespace ptd {
                     VW.angle = acos(VW.angle);
                     if (i < VRL.size() / 2) { VW.angle *= -1; }
                     VW3D.push_back(VW);
+                    if (std::fabs(VRL[i].length - VRL[i - 1].length) > delta) {
+                        VW3D.push_back(VisibleWall3D(VW3D[VW3D.size() - 1].angle, VRL[i - 1].length));
+                        temp = VW3D[VW3D.size() - 1].distance;
+                        VW3D[VW3D.size() - 1].distance = VW3D[VW3D.size() - 2].distance;
+                        VW3D[VW3D.size() - 2].distance = temp;
+                    }
                     break;
                 }
             }
@@ -429,7 +437,7 @@ namespace ptd {
         VW3D.push_back(VisibleWall3D(((RL.coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[VRL.size() - 1].coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (VRL[VRL.size() - 1].coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y))), VRL[VRL.size() - 1].length));
        // std::cout << " --- " << std::endl;
         for (int i = 0; i < VW3D.size(); i++) {
-            //std::cout << VW3D[i].distance << std::endl;
+            std::cout << VW3D[i].angle << " --- " << VW3D[i].distance << std::endl;
         }
         return VW3D;
     }
