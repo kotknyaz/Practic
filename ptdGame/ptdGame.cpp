@@ -361,8 +361,8 @@ namespace ptd {
     }*/
 
     std::vector<VisibleWall3D> GameManager::GetAngleDistance(std::vector<VisibleWall> t) {
-        t = SortVisibleWall(t);
-        double delta = 0.01;
+        //t = SortVisibleWall(t);
+        double delta = 0.1;
         double temp;
         Coord a;
         RayLine RL;
@@ -661,14 +661,10 @@ namespace ptd {
 
 
     bool GameManager::ispointin(Coord a, VisibleWall VW) { // лежит ли точка на прямой
-        double dx1, dy1, dx, dy, s;
-        dx1 = VW.coord[1].x - VW.coord[0].x;
-        dy1 = VW.coord[1].y - VW.coord[0].y;
-        dx = a.x - VW.coord[0].x;
-        dy = a.y - VW.coord[0].y;
-        s = dx1 * dy - dx * dy1;
-        if (s == 0) {
-            return true;
+        if ((a.x - VW.coord[0].x) * (VW.coord[1].y - VW.coord[0].y) == (VW.coord[1].x - VW.coord[0].x) * (a.y - VW.coord[0].y)) {
+            if (std::min(VW.coord[0].y, VW.coord[1].y) <= a.y && (std::max(VW.coord[0].y, VW.coord[1].y) >= a.y) && std::min(VW.coord[0].x, VW.coord[1].x) <= a.x && std::max(VW.coord[0].x, VW.coord[1].x) >= a.x) {
+                return true;
+            }
         }
         return false;
     }
