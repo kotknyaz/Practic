@@ -8,7 +8,7 @@ namespace ptd {
 
     MainMenu::MainMenu()
     {
-        window = new sf::RenderWindow(sf::VideoMode(800, 600), "My window");
+        window = new sf::RenderWindow(sf::VideoMode(1200, 1000), "My window");
         window->setFramerateLimit(60);
 
         Menu();
@@ -56,6 +56,53 @@ namespace ptd {
                 if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
                     isin = true;
                     if (isbeginwall) {
+                        if (j == 0) {
+                            VW.coord[0].x = VRL[j].coord[1].x;
+                            VW.coord[0].y = VRL[j].coord[1].y;
+                        }
+                        else {
+                            VW.coord[0].x = VRL[j].coord[1].x;
+                            VW.coord[0].y = VRL[j].coord[1].y;
+                            //VW.coord[0].x = VRL[j - 1].coord[1].x;
+                            //VW.coord[0].x = VRL[j - 1].coord[1].x;
+                        }
+                        isbeginwall = false;
+                    }
+                    else {
+                        VW.coord[1].x = VRL[j].coord[1].x;
+                        VW.coord[1].y = VRL[j].coord[1].y;
+                    }
+
+                }
+                else if (!isbeginwall) {
+                    VW.coord[1].x = VRL[j - 1].coord[1].x;
+                    VW.coord[1].y = VRL[j - 1].coord[1].y;
+                    break;
+                }
+            }
+            if (isin) { t.push_back(VW); }
+            isbeginwall = true;
+            isin = false;
+            
+        }
+        
+        return t;
+    }
+
+    /*std::vector<VisibleWall> GameManager::GetVisibleWalls()
+    {
+        std::vector<RayLine> VRL = GameManager::GetCrossingRayLines();
+        std::vector<VisibleWall> t;
+        VisibleWall VW;
+
+        bool isbeginwall = true;
+        bool isotherwall = false;
+        bool isin = false;
+        for (int i = 0; i < walls.size(); i++) {
+            for (int j = 0; j < VRL.size(); j++) {
+                if ((VRL[j].coord[1].x <= std::max(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].x >= std::min(walls[i]->coord[0].x, walls[i]->coord[1].x)) && (VRL[j].coord[1].y <= std::max(walls[i]->coord[0].y, walls[i]->coord[1].y)) && (VRL[j].coord[1].y >= std::min(walls[i]->coord[0].y, walls[i]->coord[1].y))) {
+                    isin = true;
+                    if (isbeginwall) {
                         if (j == 0) { //первый луч
                             VW.coord[0].x = VRL[j].coord[1].x;
                             VW.coord[0].y = VRL[j].coord[1].y;
@@ -80,7 +127,7 @@ namespace ptd {
                                 VW.coord[0].y = walls[i]->coord[0].y;
                             }
                             t.push_back(VW);
-                        }*/
+                        }
                         else { //не первый луч (пока работает)
                             VW.coord[1].x = VRL[j].coord[1].x;
                             VW.coord[1].y = VRL[j].coord[1].y;
@@ -135,12 +182,12 @@ namespace ptd {
         }
         //std::cout << t.size() << std::endl;
         return t;
-    }
+    }*/
 
     std::vector<RayLine> GameManager::GetCrossingRayLines() {
         std::vector<RayLine> VRL;
         RayLine RL;
-        double interval = 0.01;
+        double interval = 0.0001;
         double leftview = view + FOV_DIVIDE_BY2;
         double rightview = view - FOV_DIVIDE_BY2;
         double currentview = leftview;
@@ -367,6 +414,7 @@ namespace ptd {
                         a.x = t[j].coord[1].x;
                         a.y = t[j].coord[1].y;
                     }
+                    //std::cout << a.x << " --- " << a.y << std::endl;
                     VW.distance = sqrt((playerPos.x - a.x) * (playerPos.x - a.x) + (playerPos.y - a.y) * (playerPos.y - a.y));
                     VW.angle = ((RL.coord[1].x - playerPos.x) * (a.x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (a.y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((a.x - playerPos.x) * (a.x - playerPos.x) + (a.y - playerPos.y) * (a.y - playerPos.y)));
                     if (VW.angle > 1) { VW.angle = 1; }
@@ -374,10 +422,15 @@ namespace ptd {
                     VW.angle = acos(VW.angle);
                     if (i < VRL.size() / 2) { VW.angle *= -1; }
                     VW3D.push_back(VW);
+                    break;
                 }
             }
         }
         VW3D.push_back(VisibleWall3D(((RL.coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[VRL.size() - 1].coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (VRL[VRL.size() - 1].coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y))), VRL[VRL.size() - 1].length));
+       // std::cout << " --- " << std::endl;
+        for (int i = 0; i < VW3D.size(); i++) {
+            //std::cout << VW3D[i].distance << std::endl;
+        }
         return VW3D;
     }
 
@@ -385,10 +438,16 @@ namespace ptd {
     {
         clock = new sf::Clock();
 
-        walls.push_back(new Wall(Coord(-2, 4), Coord(3, 4)));
-        walls.push_back(new Wall(Coord(3, -4), Coord(3, 4)));
-        walls.push_back(new Wall(Coord(-2, -4), Coord(3, -4)));
-        walls.push_back(new Wall(Coord(-2, -4), Coord(-2, 4)));
+        walls.push_back(new Wall(Coord(3, 2), Coord(3, -2)));
+        walls.push_back(new Wall(Coord(3, -2), Coord(1, -2)));
+        walls.push_back(new Wall(Coord(1, -2), Coord(1, -5)));
+        walls.push_back(new Wall(Coord(1, -5), Coord(-2, -5)));
+        walls.push_back(new Wall(Coord(-2, -5), Coord(-2, -2)));
+        walls.push_back(new Wall(Coord(-2, -2), Coord(-5, -2)));
+        walls.push_back(new Wall(Coord(-5, -2), Coord(-5, 5)));
+        walls.push_back(new Wall(Coord(-5, 5), Coord(6, 5)));
+        walls.push_back(new Wall(Coord(6, 5), Coord(6, 2)));
+        walls.push_back(new Wall(Coord(6, 2), Coord(3, 2)));
     }
 
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
@@ -551,7 +610,7 @@ namespace ptd {
         // стены - синий; взгляд - зеленый; видимые стены - красный; игрок - белый
         double koef = 45;
         double ray = info.viewLeft;
-        double interval = 0.01;
+        double interval = 0.0001;
         sf::VertexArray vertexWalls(sf::PrimitiveType::Lines, 0);
         double halfScreenX = window->getSize().x / 2;
         double halfScreenY = window->getSize().y / 2;
@@ -585,9 +644,9 @@ namespace ptd {
             ray -= interval;
         }
 
+        window->draw(vertexRays);
         window->draw(vertexPlayer);
         window->draw(vertexWalls);
-        window->draw(vertexRays);
         window->display();
         return 0;
     }
