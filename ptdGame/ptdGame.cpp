@@ -431,6 +431,21 @@ namespace ptd {
     }
 
 
+    PrintInfo3D GameManager::Update3D(UpdateInfo& updateInfo)
+    {
+        PrintInfo3D printInfo;
+
+        view += updateInfo.viewChange * clock->getElapsedTime().asMilliseconds() * CAMERA_ROTATING_KOEF;
+        clock->restart();
+
+        playerPos.x += updateInfo.playerPosChange * cos(view);
+        playerPos.y += updateInfo.playerPosChange * sin(view);
+      
+        printInfo.walls = GetAngleDistance(GetVisibleWalls());
+
+        return printInfo;
+    }
+
 
     Interpreter::Interpreter(sf::RenderWindow* activeWindow, GameManager* gameManager) : window(activeWindow), gm(gameManager)
     {
@@ -439,7 +454,8 @@ namespace ptd {
 
     int Interpreter::GameProcess()
     {
-        
+        bool rejim = true;
+
         while (window->isOpen())
         {
             sf::Event event;
@@ -479,8 +495,50 @@ namespace ptd {
                 toSent.playerPosChange -= 0.05;
             }
 
-            Print2D( gm->Update2D(toSent) );
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Tab))
+            {
+                rejim = !rejim;
+            }
+
+            if(rejim)
+                Print3D( gm->Update3D(toSent) );
+            else
+                Print2D(gm->Update2D(toSent));
         }
+    }
+
+
+    int Interpreter::Print3D(PrintInfo3D& info)
+    {
+        double koef = 0.5;
+        sf::VertexArray verWalls(sf::PrimitiveType::Lines, 0);
+
+        for (int i = 0; i < info.walls.size(); ++i)
+        {
+            double x, y_half;
+            x = window->getSize().x * (info.walls[i].angle + FOV_DIVIDE_BY2) / FOV;
+            y_half = koef * window->getSize().y / info.walls[i].distance;
+
+            std::cout << x << " " << y_half << std::endl;
+
+            if (i > 0)
+            {
+                verWalls.append(sf::Vertex(verWalls[i - 2].position, sf::Color::Red));
+                verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 - y_half), sf::Color::Red));
+
+                verWalls.append(sf::Vertex(verWalls[i - 1].position, sf::Color::Green));
+                verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 + y_half), sf::Color::Green));
+            }
+
+            verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 - y_half), sf::Color::Blue));
+            verWalls.append(sf::Vertex(sf::Vector2f(x, window->getSize().y / 2 + y_half), sf::Color::Blue));
+        }
+        std::cout << std::endl;
+
+        window->clear(sf::Color::White);
+        window->draw(verWalls);
+        window->display();
+        return 0;
     }
 
     int Interpreter::Print2D(PrintInfo2D& info)
@@ -536,7 +594,7 @@ namespace ptd {
         */
 
 
-        window->draw(vertexPlayer);
+        //window->draw(vertexPlayer);
         window->draw(vertexWalls);
         window->draw(vertexRays);
         //window->draw(vertexVisibleWalls);

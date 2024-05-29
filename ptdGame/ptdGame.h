@@ -78,7 +78,10 @@ namespace ptd {
 
 		PrintInfo2D();
 	};
-
+	struct PrintInfo3D
+	{
+		std::vector<VisibleWall3D> walls;
+	};
 
 	// ----------------------------------------- Основные классы игры -----------------------------------------
 	class MainMenu // при начале игры создает GameManager (давая ему данные об уровне и т.п.) и 
@@ -111,6 +114,7 @@ namespace ptd {
 	public:
 		GameManager(); // пока пусто
 		PrintInfo2D Update2D(UpdateInfo&);
+		PrintInfo3D Update3D(UpdateInfo&);
 	};
 
 
@@ -122,7 +126,7 @@ namespace ptd {
 		Interpreter(sf::RenderWindow*, GameManager*);
 		int GameProcess();
 		int Print2D(PrintInfo2D&);
-
+		int Print3D(PrintInfo3D&);
 	};
 
 }
