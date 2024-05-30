@@ -47,7 +47,6 @@ namespace ptd {
         std::vector<RayLine> VRL = GameManager::GetCrossingRayLines();
         std::vector<VisibleWall> t;
         VisibleWall VW;
-
         bool isbeginwall = true;
         bool isotherwall = false;
         bool isin = false;
@@ -64,7 +63,6 @@ namespace ptd {
                         VW.coord[1].x = VRL[j].coord[1].x;
                         VW.coord[1].y = VRL[j].coord[1].y;
                     }
-
                 }
                 else if (!isbeginwall) {
                     VW.coord[1].x = VRL[j - 1].coord[1].x;
@@ -77,16 +75,15 @@ namespace ptd {
             if (isin) { t.push_back(VW); }
             isbeginwall = true;
             isin = false;
-            
         }
-        
+   
         return t;
     }
 
     std::vector<RayLine> GameManager::GetCrossingRayLines() {
         std::vector<RayLine> VRL;
         RayLine RL;
-        double interval = 0.0001;
+        double interval = 0.001;
         double leftview = view + FOV_DIVIDE_BY2;
         double rightview = view - FOV_DIVIDE_BY2;
         double currentview = leftview;
@@ -146,6 +143,7 @@ namespace ptd {
             xm = 999;
             ym = 999;
         }
+        //std::cout << VRL.size() << std::endl;
         return VRL;
     }
 
@@ -188,9 +186,10 @@ namespace ptd {
         return a;
     }
 
-    /*RayLine GameManager::GetCollisionRayLines() {
+    double GameManager::GetCollisionAngle() {
         std::vector<RayLine> VRL;
         RayLine RL;
+        double CollisionAngle = 300;
         double delta = 0.1;
         double interval = 0.1;
         double currentview = 0;;
@@ -248,7 +247,9 @@ namespace ptd {
                     RL.coord[1].x = VRL[i].coord[0].x;
                     RL.coord[1].y = VRL[i].coord[0].y;
                     RL.length = VRL[i].length;
-                    return RL;
+                    CollisionAngle = acos((walls[j]->coord[1].y - walls[j]->coord[0].y) / (sqrt((walls[j]->coord[1].x - walls[j]->coord[0].x) * (walls[j]->coord[1].x - walls[j]->coord[0].x) + (walls[j]->coord[1].y - walls[j]->coord[0].y) * (walls[j]->coord[1].y - walls[j]->coord[0].y))));
+                    if ((walls[j]->coord[0].y == walls[j]->coord[1].y) && playerPos.y < walls[j]->coord[0].y) { CollisionAngle *= -1; }
+                    return CollisionAngle;
                 }
             }
             minlength = DBL_MAX;
@@ -256,8 +257,8 @@ namespace ptd {
             ym = 999;
         }
 
-        return RL;
-    }*/
+        return DBL_MAX;
+    }
 
     std::vector<VisibleWall3D> GameManager::GetAngleDistance(std::vector<VisibleWall> t) {
         //t = SortVisibleWall(t);
@@ -352,9 +353,9 @@ namespace ptd {
         walls.push_back(new Wall(Coord(-5, 5), Coord(6, 5)));
         walls.push_back(new Wall(Coord(6, 5), Coord(6, 2)));
         walls.push_back(new Wall(Coord(6, 2), Coord(3, 2)));
-        walls.push_back(new Wall(Coord(-3, 1), Coord(-2, 3)));
-        walls.push_back(new Wall(Coord(-2, 3), Coord(-1, 1)));
-        walls.push_back(new Wall(Coord(-1, 1), Coord(-3, 1)));
+        walls.push_back(new Wall(Coord(-2, 3), Coord(-3, 1)));
+        walls.push_back(new Wall(Coord(-1, 1), Coord(-2, 3)));
+        walls.push_back(new Wall(Coord(-3, 1), Coord(-1, 1)));
         //walls.push_back(new Wall(Coord(-2, 1), Coord(-2, 2)));
         //walls.push_back(new Wall(Coord(-2, 2), Coord(-1, 2)));
         //walls.push_back(new Wall(Coord(-1, 2), Coord(-1, 1)));
@@ -364,7 +365,7 @@ namespace ptd {
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
     {
         PrintInfo2D printInfo;
-        RayLine RL;
+        double CollisionAngle;
         view += updateInfo.viewChange * clock->getElapsedTime().asMilliseconds() * CAMERA_ROTATING_KOEF;
         //std::cout << std::endl << 1.f / clock->getElapsedTime().asSeconds() << std::endl;
         clock->restart();
@@ -379,13 +380,19 @@ namespace ptd {
         printInfo.visibleWalls = GetVisibleWalls(); // получаем вектор видимых стен: visibleWalls[0].coord[0].x - точка начала по иксу, и тоже самое с y,
                                                     // visibleWalls[0].coord[1].x - точка конца по иксу, и тоже самое по y
                                                     // и т.д. (visibleWalls[1]..., visibleWalls[2]...)
-        //RL = GetCollisionRayLines();
+        CollisionAngle = GetCollisionAngle();
+        //std::cout << RL.length << std::endl;
  
         // Изменение положения игрока относительно направления взгляда
-        playerPos.x += updateInfo.playerPosChange * cos(view);
-        playerPos.y += updateInfo.playerPosChange * sin(view);
-        
-        // temp
+        if (CollisionAngle == DBL_MAX) {
+            playerPos.x += updateInfo.playerPosChange * cos(view);
+            playerPos.y += updateInfo.playerPosChange * sin(view);
+        }
+        else {
+            playerPos.x += fabs(updateInfo.playerPosChange) * cos(CollisionAngle);
+            playerPos.y += fabs(updateInfo.playerPosChange) * sin(CollisionAngle);
+        }
+
         printInfo.walls = walls;
         printInfo.playerPos.x += playerPos.x;
         printInfo.playerPos.y += playerPos.y;
@@ -400,12 +407,21 @@ namespace ptd {
     PrintInfo3D GameManager::Update3D(UpdateInfo& updateInfo)
     {
         PrintInfo3D printInfo;
-
+        double CollisionAngle;
         view += updateInfo.viewChange * clock->getElapsedTime().asMilliseconds() * CAMERA_ROTATING_KOEF;
         clock->restart();
 
-        playerPos.x += updateInfo.playerPosChange * cos(view);
-        playerPos.y += updateInfo.playerPosChange * sin(view);
+        CollisionAngle = GetCollisionAngle();
+        //std::cout << RL.length << std::endl;
+
+        if (CollisionAngle == DBL_MAX) {
+            playerPos.x += updateInfo.playerPosChange * cos(view);
+            playerPos.y += updateInfo.playerPosChange * sin(view);
+        }
+        else {
+            playerPos.x += fabs(updateInfo.playerPosChange) * cos(CollisionAngle);
+            playerPos.y += fabs(updateInfo.playerPosChange) * sin(CollisionAngle);
+        }
       
         printInfo.walls = GetAngleDistance(GetVisibleWalls());
 
@@ -521,7 +537,7 @@ namespace ptd {
         // стены - синий; взгляд - зеленый; видимые стены - красный; игрок - белый
         double koef = 45;
         double ray = info.viewLeft;
-        double interval = 0.0001;
+        double interval = 0.001;
         sf::VertexArray vertexWalls(sf::PrimitiveType::Lines, 0);
         double halfScreenX = window->getSize().x / 2;
         double halfScreenY = window->getSize().y / 2;
