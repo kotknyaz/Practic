@@ -10,12 +10,6 @@
 #include <vector>
 
 namespace ptd {
-	/*
-	* Будет два режима запуска для отладки - 2D с видом сверху; ну и псевдо-3D
-	* все классы где есть приписка 2D - классы для отладки, потом будут созданы аналоги
-	*/
-
-
 	// ----------------------------------------- Служебные типы данных -----------------------------------------
 	struct Coord
 	{
@@ -32,7 +26,6 @@ namespace ptd {
 	struct Wall // стена в 2D
 	{
 		Coord coord[2];
-	public:
 		Wall(Coord, Coord);
 		Wall();
 	};
@@ -40,7 +33,6 @@ namespace ptd {
 	{
 		Coord coord[2];
 		double length;
-	public:
 		RayLine(Coord, Coord);
 		RayLine();
 	};
@@ -48,30 +40,21 @@ namespace ptd {
 	{
 		bool isCrossing;
 		double distance;
-	public:
 		CrossingRayLineInfo();
 	};
 	struct VisibleWall
 	{
-		Coord coord[2];
-	public:
-		VisibleWall(Coord, Coord);
-		VisibleWall();
-	};
-	struct VisibleWall3D
-	{
 		double angle;
 		double distance;
-	public:
-		VisibleWall3D(double, double);
-		VisibleWall3D();
+		VisibleWall(double, double);
+		VisibleWall();
 	};
-	struct PrintInfo2D // передается от GameManager к Interpreter (что теперь нужно рисовать; в ответ на UpdateInfo)
+	struct PrintInfo2D
 	{
 		Coord playerPos;
 		std::vector<Wall*> walls;
 		std::vector<RayLine> VRL;
-		std::vector<VisibleWall> visibleWalls;
+		std::vector<Wall> visibleWalls;
 		double viewLeft;
 		double viewRight;
 
@@ -79,7 +62,7 @@ namespace ptd {
 	};
 	struct PrintInfo3D
 	{
-		std::vector<VisibleWall3D> walls;
+		std::vector<VisibleWall> walls;
 	};
 
 	// ----------------------------------------- Основные классы игры -----------------------------------------
@@ -91,6 +74,7 @@ namespace ptd {
 	public:
 		MainMenu();
 		int Menu();
+		~MainMenu();
 	};
 
 
@@ -98,15 +82,15 @@ namespace ptd {
 	{
 		sf::Clock* clock;
 
-		std::vector<Wall*> walls; // temp
+		std::vector<Wall*> walls;
 		Coord playerPos;
 		double view;
 
-		bool ispointin(Coord, VisibleWall);
-		std::vector<VisibleWall> SortVisibleWall(std::vector<VisibleWall>);
-		std::vector<VisibleWall> GetVisibleWalls(); // определяет видимые стены
+		bool ispointin(Coord, Wall);
+		std::vector<Wall> SortVisibleWall(std::vector<Wall>);
+		std::vector<Wall> GetVisibleWalls(); // определяет видимые стены
 		std::vector<RayLine> GetCrossingRayLines(); // определяет длину каждого луча в зависимости от расстояния до стены
-		std::vector<VisibleWall3D> GetAngleDistance(std::vector<VisibleWall>);
+		std::vector<VisibleWall> GetAngleDistance(std::vector<Wall>);
 		double GetCollisionAngle();
 		CrossingRayLineInfo CrossingRayLine(const Wall&);
 
@@ -125,10 +109,33 @@ namespace ptd {
 	public:
 		Interpreter(sf::RenderWindow*, GameManager*);
 		int GameProcess();
-		int Print2D(PrintInfo2D&);
-		int Print3D(PrintInfo3D&);
+		int Print(PrintInfo2D&);
+		int Print(PrintInfo3D&);
 	};
 
+
+
+	// ----------------------------------------- Еще какието классы -----------------------------------------
+
+	class Drawble
+	{
+	protected:
+		double size;
+		Coord coord;
+		sf::Shape* shape;
+
+	public:
+		Coord GetCoord();
+		double GetSize();
+		int Draw(double x, double width, sf::RenderWindow* window);
+		Drawble(double width, Coord c, sf::Shape* usingShape);
+		~Drawble();
+	};
+
+	class Object : public Drawble
+	{
+
+	};
 }
 
 #endif //PTDGAME_H
