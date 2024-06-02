@@ -79,7 +79,6 @@ namespace ptd
     int Interpreter::Print(PrintInfo3D& info)
     {
         double koef = 0.45;
-        //double k1 = 0.5;
         sf::VertexArray verWalls(sf::PrimitiveType::Lines, 0);
 
         for (int i = 0; i < info.walls.size(); ++i)

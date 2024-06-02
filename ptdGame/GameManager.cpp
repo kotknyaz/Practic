@@ -108,49 +108,8 @@ namespace ptd {
             xm = 999;
             ym = 999;
         }
-        //std::cout << VRL.size() << std::endl;
         return VRL;
     }
-
-    CrossingRayLineInfo GameManager::CrossingRayLine(const Wall& wall)
-    {
-        CrossingRayLineInfo a;
-        RayLine RL;
-        RL.coord[0].x = playerPos.x;
-        RL.coord[0].y = playerPos.y;
-        RL.coord[1].x = cos(view) + playerPos.x;
-        RL.coord[1].y = sin(view) + playerPos.y;
-
-        double k1, k2, b1, b2, xp, yp;
-        if (RL.coord[0].x == RL.coord[1].x) {
-            k1 = DBL_MAX;
-            b1 = 0;
-        }
-        else {
-            k1 = (RL.coord[0].y - RL.coord[1].y) / (RL.coord[0].x - RL.coord[1].x);
-            b1 = RL.coord[0].y - (k1 * RL.coord[0].x);
-        }
-        if (wall.coord[0].x == wall.coord[1].x) {
-            xp = wall.coord[0].x;
-            yp = (k1 * xp) + b1;
-        }
-        else {
-            k2 = (wall.coord[0].y - wall.coord[1].y) / (wall.coord[0].x - wall.coord[1].x);
-            b2 = wall.coord[0].y - (k2 * wall.coord[0].x);
-            if (k1 == k2) { return a; }
-            xp = (b2 - b1) / (k1 - k2);
-            yp = (k2 * xp) + b2;
-        }
-        if ((xp > std::max(wall.coord[0].x, wall.coord[1].x)) || (xp < std::min(wall.coord[0].x, wall.coord[1].x))) {return a;}
-        if ((yp > std::max(wall.coord[0].y, wall.coord[1].y)) || (yp < std::min(wall.coord[0].y, wall.coord[1].y))) { return a; }
-        if ((RL.coord[0].x < RL.coord[1].x) && (xp < RL.coord[0].x)) { return a; }
-        if ((RL.coord[0].x > RL.coord[1].x) && (xp > RL.coord[0].x)) { return a; }
-
-        a.distance = sqrt(((xp - RL.coord[0].x) * (xp - RL.coord[0].x)) + ((yp - RL.coord[0].y) * (yp - RL.coord[0].y)));
-        a.isCrossing = true;
-        return a;
-    }
-
     double GameManager::GetCollisionAngle() {
         std::vector<RayLine> VRL;
         RayLine RL;
@@ -226,7 +185,6 @@ namespace ptd {
     }
 
     std::vector<VisibleWall> GameManager::GetAngleDistance(std::vector<Wall> t) {
-        //t = SortVisibleWall(t);
         double delta = 0.1;
         double temp;
         Coord a;
@@ -281,7 +239,6 @@ namespace ptd {
                         a.x = t[j].coord[1].x;
                         a.y = t[j].coord[1].y;
                     }
-                    //std::cout << a.x << " --- " << a.y << std::endl;
                     VW.distance = sqrt((playerPos.x - a.x) * (playerPos.x - a.x) + (playerPos.y - a.y) * (playerPos.y - a.y));
                     VW.angle = ((RL.coord[1].x - playerPos.x) * (a.x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (a.y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((a.x - playerPos.x) * (a.x - playerPos.x) + (a.y - playerPos.y) * (a.y - playerPos.y)));
                     if (VW.angle > 1) { VW.angle = 1; }
@@ -299,8 +256,11 @@ namespace ptd {
                 }
             }
         }
-        VW3D.push_back(VisibleWall(((RL.coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) * (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) * sqrt((VRL[VRL.size() - 1].coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + (VRL[VRL.size() - 1].coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y))), VRL[VRL.size() - 1].length));
-       // std::cout << " --- " << std::endl;
+        VW3D.push_back(VisibleWall(((RL.coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) + 
+            (RL.coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y)) / (sqrt((RL.coord[1].x - playerPos.x) *
+                (RL.coord[1].x - playerPos.x) + (RL.coord[1].y - playerPos.y) * (RL.coord[1].y - playerPos.y)) *
+                sqrt((VRL[VRL.size() - 1].coord[1].x - playerPos.x) * (VRL[VRL.size() - 1].coord[1].x - playerPos.x) +
+                    (VRL[VRL.size() - 1].coord[1].y - playerPos.y) * (VRL[VRL.size() - 1].coord[1].y - playerPos.y))), VRL[VRL.size() - 1].length));
         return VW3D;
     }
 
@@ -338,7 +298,6 @@ namespace ptd {
                                                     // visibleWalls[0].coord[1].x - точка конца по иксу, и тоже самое по y
                                                     // и т.д. (visibleWalls[1]..., visibleWalls[2]...)
         CollisionAngle = GetCollisionAngle();
-        //std::cout << RL.length << std::endl;
  
         // Изменение положения игрока относительно направления взгляда
         if (CollisionAngle == DBL_MAX) {

@@ -25,7 +25,6 @@ namespace ptd {
 		std::vector<RayLine> GetCrossingRayLines(); // определяет длину каждого луча в зависимости от расстояния до стены
 		std::vector<VisibleWall> GetAngleDistance(std::vector<Wall>);
 		double GetCollisionAngle();
-		CrossingRayLineInfo CrossingRayLine(const Wall&);
 
 	public:
 		GameManager(); // пока пусто
