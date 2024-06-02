@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INTERPRETER_H
+#define INTERPRETER_H
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -8,13 +9,11 @@
 #include <iostream>
 #include <vector>
 
-
-#include "DataTypes.h"
 #include "GameManager.h"
-#include "MainMenu.h"
 
 namespace ptd
 {
+
 
 	class Interpreter // каждый кадр передает действия игрока в GameManager и отрисовывает полученные от него данные
 	{
@@ -31,3 +30,5 @@ namespace ptd
 	};
 
 }
+
+#endif //INTERPRETER_H

@@ -1,5 +1,5 @@
-﻿#ifndef PTDGAME_H
-#define PTDGAME_H
+﻿#ifndef GAMEMANAGER_H
+#define GAMEMANAGER_H
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -10,8 +10,6 @@
 #include <vector>
 
 #include "DataTypes.h"
-#include "Interpreter.h"
-#include "MainMenu.h"
 
 namespace ptd {
 
@@ -39,4 +37,4 @@ namespace ptd {
 
 }
 
-#endif //PTDGAME_H
+#endif //GAMEMANAGER_H

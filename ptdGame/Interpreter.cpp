@@ -63,6 +63,7 @@ namespace ptd
             else
                 Print(gm->Update2D(toSent));
         }
+        return 0;
     }
 
 

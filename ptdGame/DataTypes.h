@@ -1,18 +1,7 @@
-#pragma once
+#ifndef DATATYPES_H
+#define DATATYPES_H
 
-
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <SFML/Window.hpp>
-#include <SFML/System.hpp>
-#include <SFML/Graphics.hpp>
-#include <iostream>
 #include <vector>
-
-
-#include "GameManager.h"
-#include "Interpreter.h"
-#include "MainMenu.h"
 
 namespace ptd {
 
@@ -72,3 +61,5 @@ namespace ptd {
 	};
 
 }
+
+#endif //DATATYPES_H
