@@ -13,8 +13,8 @@ set(${project}_SOURCE_LIST ${${project}_SOURCES})
 
 add_executable(${project} ${${project}_SOURCE_LIST})
 
-target_link_libraries(${project} ptdGame)
 
+target_link_libraries(${project} ptdGame)
 
 
 target_link_libraries(${project} ${CMAKE_SOURCE_DIR}/SFML/library/sfml-audio.lib)
@@ -24,3 +24,4 @@ target_link_libraries(${project} ${CMAKE_SOURCE_DIR}/SFML/library/sfml-system.li
 target_link_libraries(${project} ${CMAKE_SOURCE_DIR}/SFML/library/sfml-window.lib)
 
 include_directories(${CMAKE_SOURCE_DIR}/SFML/include)
+target_include_directories(${project} PUBLIC ptdGame)

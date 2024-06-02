@@ -1,6 +1,6 @@
 #include <iostream>
 #include <SFML/Window.hpp>
-#include "ptdGame/ptdGame.h"
+#include "ptdGame/MainMenu.h"
 
 int main() {
     
