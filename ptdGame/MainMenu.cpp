@@ -24,7 +24,7 @@ namespace ptd
                 case sf::Event::KeyPressed:     //начало игры
                 {
                     GameManager gm;
-                    Interpreter inter(window, &gm);
+                    Interpreter::Instance(window, &gm);
                     break;
                 }
                 case sf::Event::Closed:         //закрытие окна

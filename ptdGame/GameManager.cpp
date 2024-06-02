@@ -3,7 +3,8 @@
 namespace ptd {
     const double FOV = (M_PI / 3);
     const double FOV_DIVIDE_BY2 = FOV / 2;
-    const double CAMERA_ROTATING_KOEF = 1.f / 150.f;
+    const double CAMERA_ROTATING_KOEF = 1.f / 300.f;
+    const double PLAYER_SPEED = 0.004;
 
 
     std::vector<Wall> GameManager::GetVisibleWalls()
@@ -318,10 +319,6 @@ namespace ptd {
         walls.push_back(new Wall(Coord(-2, 3), Coord(-3, 1)));
         walls.push_back(new Wall(Coord(-1, 1), Coord(-2, 3)));
         walls.push_back(new Wall(Coord(-3, 1), Coord(-1, 1)));
-        //walls.push_back(new Wall(Coord(-2, 1), Coord(-2, 2)));
-        //walls.push_back(new Wall(Coord(-2, 2), Coord(-1, 2)));
-        //walls.push_back(new Wall(Coord(-1, 2), Coord(-1, 1)));
-        //walls.push_back(new Wall(Coord(-1, 1), Coord(-2, 1)));
     }
 
     PrintInfo2D GameManager::Update2D(UpdateInfo& updateInfo)
@@ -329,7 +326,6 @@ namespace ptd {
         PrintInfo2D printInfo;
         double CollisionAngle;
         view += updateInfo.viewChange * CAMERA_ROTATING_KOEF;
-        //std::cout << std::endl << 1.f / clock->getElapsedTime().asSeconds() << std::endl;
         
 
 
@@ -346,18 +342,17 @@ namespace ptd {
  
         // Изменение положения игрока относительно направления взгляда
         if (CollisionAngle == DBL_MAX) {
-            playerPos.x += updateInfo.playerPosChange * cos(view);
-            playerPos.y += updateInfo.playerPosChange * sin(view);
+            playerPos.x += updateInfo.playerPosChange * cos(view) * PLAYER_SPEED;
+            playerPos.y += updateInfo.playerPosChange * sin(view) * PLAYER_SPEED;
         }
         else {
-            playerPos.x += fabs(updateInfo.playerPosChange) * cos(CollisionAngle);
-            playerPos.y += fabs(updateInfo.playerPosChange) * sin(CollisionAngle);
+            playerPos.x += fabs(updateInfo.playerPosChange) * cos(CollisionAngle) * PLAYER_SPEED;
+            playerPos.y += fabs(updateInfo.playerPosChange) * sin(CollisionAngle) * PLAYER_SPEED;
         }
 
         printInfo.walls = walls;
         printInfo.playerPos.x += playerPos.x;
         printInfo.playerPos.y += playerPos.y;
-        //std::cout << printInfo.playerPos.x << " _ " << printInfo.playerPos.y << std::endl;
         printInfo.viewLeft = view + FOV_DIVIDE_BY2;
         printInfo.viewRight = view - FOV_DIVIDE_BY2;
 
@@ -372,15 +367,14 @@ namespace ptd {
         view += updateInfo.viewChange* CAMERA_ROTATING_KOEF;
 
         CollisionAngle = GetCollisionAngle();
-        //std::cout << RL.length << std::endl;
 
         if (CollisionAngle == DBL_MAX) {
-            playerPos.x += updateInfo.playerPosChange * cos(view);
-            playerPos.y += updateInfo.playerPosChange * sin(view);
+            playerPos.x += updateInfo.playerPosChange * cos(view) * PLAYER_SPEED;
+            playerPos.y += updateInfo.playerPosChange * sin(view) * PLAYER_SPEED;
         }
         else {
-            playerPos.x += fabs(updateInfo.playerPosChange) * cos(CollisionAngle);
-            playerPos.y += fabs(updateInfo.playerPosChange) * sin(CollisionAngle);
+            playerPos.x += fabs(updateInfo.playerPosChange) * cos(CollisionAngle) * PLAYER_SPEED;
+            playerPos.y += fabs(updateInfo.playerPosChange) * sin(CollisionAngle) * PLAYER_SPEED;
         }
       
         printInfo.walls = GetAngleDistance(GetVisibleWalls());

@@ -14,19 +14,24 @@
 namespace ptd
 {
 
-
 	class Interpreter // каждый кадр передает действия игрока в GameManager и отрисовывает полученные от него данные
 	{
-		sf::Clock* clock;
+		static Interpreter* _instance;
+	public:
+		static Interpreter* Instance(sf::RenderWindow*, GameManager*);
 
+
+	private:
+		sf::Clock* clock;
 		sf::RenderWindow* window;
 		GameManager* gm;
-	public:
 		Interpreter(sf::RenderWindow*, GameManager*);
+	public:
 		~Interpreter();
 		int GameProcess();
 		int Print(PrintInfo2D&);
 		int Print(PrintInfo3D&);
+
 	};
 
 }

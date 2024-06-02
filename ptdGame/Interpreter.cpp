@@ -6,6 +6,14 @@ namespace ptd
     const double FOV_DIVIDE_BY2 = FOV / 2;
     const double CAMERA_ROTATING_KOEF = 1.f / 150.f;
 
+    Interpreter* Interpreter::_instance = 0;
+    Interpreter* Interpreter::Instance(sf::RenderWindow* activeWindow, GameManager* gameManager) {
+        if (_instance == 0)
+        {
+            _instance = new Interpreter(activeWindow, gameManager);
+        }
+        return _instance;
+    }
 
     Interpreter::Interpreter(sf::RenderWindow* activeWindow, GameManager* gameManager) : window(activeWindow), gm(gameManager)
     {
@@ -38,22 +46,22 @@ namespace ptd
             toSent.viewChange = 0;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)))
             {
-                toSent.viewChange += 0.5 * clock->getElapsedTime().asMilliseconds();
+                toSent.viewChange += clock->getElapsedTime().asMilliseconds();
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)))
             {
-                toSent.viewChange -= 0.5 * clock->getElapsedTime().asMilliseconds();
+                toSent.viewChange -= clock->getElapsedTime().asMilliseconds();
             }
 
             // движение вперёд-назад (возможно временно)
             toSent.playerPosChange = 0;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)))
             {
-                toSent.playerPosChange += 0.006 * clock->getElapsedTime().asMilliseconds();
+                toSent.playerPosChange += clock->getElapsedTime().asMilliseconds();
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) || (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)))
             {
-                toSent.playerPosChange -= 0.006 * clock->getElapsedTime().asMilliseconds();
+                toSent.playerPosChange -= clock->getElapsedTime().asMilliseconds();
             }
             clock->restart();
 
